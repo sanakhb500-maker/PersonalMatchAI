@@ -1,0 +1,15 @@
+adm1_name,commodity,monthly_income,max_budget_syp,monthly_quantity,wtp_ceiling_syp,segment_name,actual_price_syp,price_gap,affordable
+Tartous,Bread (bakery) - Retail,341250,68250,129.0,529.1,Viable coastal & admin markets,153.47220000000002,-375.6,True
+City_Damascus,Bread (bakery) - Retail,284583,56917,129.0,441.2,Viable coastal & admin markets,100.0,-341.2,True
+Damascus,Bread (bakery) - Retail,259018,51804,129.0,401.6,Fragmented major urban centers,103.86905714285714,-297.7,True
+Lattakia,Bread (bakery) - Retail,225333,45067,129.0,349.4,Viable coastal & admin markets,133.33333333333334,-216.1,True
+Idleb,Bread (bakery) - Retail,213642,42728,129.0,331.2,Stressed interior markets,1239.48334,908.3,False
+Raqqa,Bread (bakery) - Retail,211250,42250,129.0,327.5,Stressed interior markets,172.0,-155.5,True
+Al_Qunaytirah,Bread (bakery) - Retail,208125,41625,129.0,322.7,Stressed interior markets,150.0,-172.7,True
+Hama,Bread (bakery) - Retail,202000,40400,129.0,313.2,Stressed interior markets,135.0,-178.2,True
+Aleppo,Bread (bakery) - Retail,198661,39732,129.0,308.0,Fragmented major urban centers,664.2857142857143,356.3,False
+Homs,Bread (bakery) - Retail,186429,37286,129.0,289.0,Stressed interior markets,125.0,-164.0,True
+Dara,Bread (bakery) - Retail,176172,35234,129.0,273.1,Stressed interior markets,130.989575,-142.1,True
+As_Suweida,Bread (bakery) - Retail,175937,35187,129.0,272.8,Stressed interior markets,100.0,-172.8,True
+Hassakeh,Bread (bakery) - Retail,152500,30500,129.0,236.4,Stressed interior markets,100.0,-136.4,True
+Dayr_Az_Zor,Bread (bakery) - Retail,126071,25214,129.0,195.5,Stressed interior markets,143.15474285714285,-52.3,True

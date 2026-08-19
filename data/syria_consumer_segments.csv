@@ -1,0 +1,15 @@
+adm1_name,volatility_index,avg_affordability,min_affordability,trend_affordability,avg_basket_cost,cluster,segment_name
+Damascus,95.3,0.6587875000000001,0.077,0.09,461549.91012193495,2,Fragmented major urban centers
+Aleppo,72.45,0.4621012658227848,0.063,0.084,433983.0232324848,2,Fragmented major urban centers
+Lattakia,54.16,1.3695316455696203,0.213,0.222,126487.7739628481,1,Viable coastal & admin markets
+City_Damascus,54.01,1.086325,0.175,0.231,193297.26592925625,1,Viable coastal & admin markets
+Tartous,52.21,1.3582784810126582,0.215,0.334,153234.03288941647,1,Viable coastal & admin markets
+Dayr_Az_Zor,52.08,0.6629873417721519,0.051,0.125,170565.41472799872,0,Stressed interior markets
+Idleb,48.16,0.4638235294117647,0.101,0.101,300846.0002631353,0,Stressed interior markets
+Homs,47.8,0.5868,0.041,0.071,475032.25765929,0,Stressed interior markets
+Dara,47.4,0.50065,0.05,0.055,417710.41012409376,0,Stressed interior markets
+Hama,47.17,0.7675125,0.082,0.097,291938.66060664627,0,Stressed interior markets
+As_Suweida,45.9,0.9502499999999999,0.08,0.103,203449.23467004875,0,Stressed interior markets
+Al_Qunaytirah,45.15,0.6832,0.065,0.171,334503.13459063385,0,Stressed interior markets
+Hassakeh,45.12,0.6786582278481013,0.132,0.15,158113.80039998353,0,Stressed interior markets
+Raqqa,42.27,0.9687721518987342,0.088,0.204,184379.1936904038,0,Stressed interior markets

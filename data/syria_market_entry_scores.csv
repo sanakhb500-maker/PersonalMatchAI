@@ -1,0 +1,15 @@
+adm1_name,purchasing_power,volatility_index,price_gap,data_density,segment_score,segment_name,score_purchasing,score_stability,score_access,score_density,score_segment,composite_score,rank,bar_color
+Tartous,1.3582784810126582,52.21,-375.6,3271,3,Viable coastal & admin markets,98.76,81.26,100.0,0.0,100.0,84.94,1,#2E7D32
+Lattakia,1.3695316455696205,54.16,-216.1,3273,3,Viable coastal & admin markets,100.0,77.58,87.58,0.04,100.0,81.29,2,#2E7D32
+City_Damascus,1.086325,54.01,-341.2,3736,3,Viable coastal & admin markets,68.79,77.86,97.32,10.15,100.0,75.45,3,#2E7D32
+Raqqa,0.9687721518987342,42.27,-155.5,3884,2,Stressed interior markets,55.84,100.0,82.86,13.38,50.0,68.81,4,#E65100
+As_Suweida,0.95025,45.9,-172.8,3338,2,Stressed interior markets,53.79,93.15,84.2,1.46,50.0,65.62,5,#E65100
+Hama,0.7675125,47.17,-178.2,5283,2,Stressed interior markets,33.66,90.76,84.62,43.91,50.0,63.33,6,#E65100
+Homs,0.5868,47.8,-164.0,7853,2,Stressed interior markets,13.74,89.57,83.52,100.0,50.0,62.39,7,#E65100
+Al_Qunaytirah,0.6832,45.15,-172.7,4006,2,Stressed interior markets,24.37,94.57,84.2,16.04,50.0,58.61,8,#E65100
+Dara,0.50065,47.4,-142.1,6603,2,Stressed interior markets,4.25,90.33,81.81,72.72,50.0,56.58,9,#E65100
+Hassakeh,0.6786582278481013,45.12,-136.4,3412,2,Stressed interior markets,23.86,94.63,81.37,3.08,50.0,56.47,10,#E65100
+Dayr_Az_Zor,0.6629873417721519,52.08,-52.3,3641,2,Stressed interior markets,22.14,81.5,74.82,8.08,50.0,51.53,11,#E65100
+Damascus,0.6587875000000001,95.3,-297.7,6373,1,Fragmented major urban centers,21.68,0.0,93.93,67.7,0.0,36.76,12,#C62828
+Aleppo,0.4621012658227848,72.45,356.3,7735,1,Fragmented major urban centers,0.0,43.09,42.99,97.42,0.0,31.26,13,#C62828
+Idleb,0.4638235294117647,48.16,908.3,3611,2,Stressed interior markets,0.19,88.89,0.0,7.42,50.0,28.02,14,#E65100

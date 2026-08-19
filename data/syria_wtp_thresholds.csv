@@ -1,0 +1,253 @@
+adm1_name,commodity,monthly_income,max_budget_syp,monthly_quantity,wtp_ceiling_syp
+Al_Qunaytirah,Wheat flour - Retail,208125,41625,29.67,1402.9
+Al_Qunaytirah,Wheat flour (local) - Retail,208125,41625,29.67,1402.9
+Al_Qunaytirah,Bread (bakery) - Retail,208125,41625,129.0,322.7
+Al_Qunaytirah,Bread (shop) - Retail,208125,41625,129.0,322.7
+Al_Qunaytirah,Rice - Retail,208125,41625,3.22,12907.0
+Al_Qunaytirah,Sugar - Retail,208125,41625,3.22,12907.0
+Al_Qunaytirah,Oil - Retail,208125,41625,3.22,12907.0
+Al_Qunaytirah,Lentils - Retail,208125,41625,3.22,12907.0
+Al_Qunaytirah,Chickpeas - Retail,208125,41625,1.07,38720.9
+Al_Qunaytirah,Beans (white) - Retail,208125,41625,1.07,38720.9
+Al_Qunaytirah,Salt (iodised) - Retail,208125,41625,0.26,161337.2
+Al_Qunaytirah,Bulgur - Retail,208125,41625,2.15,19360.5
+Al_Qunaytirah,Pasta (spaghetti) - Retail,208125,41625,2.15,19360.5
+Al_Qunaytirah,Tea - Retail,208125,41625,0.43,96802.3
+Al_Qunaytirah,Eggs - Retail,208125,41625,51.6,806.7
+Al_Qunaytirah,Tomatoes - Retail,208125,41625,8.6,4840.1
+Al_Qunaytirah,Potatoes - Retail,208125,41625,6.45,6453.5
+Al_Qunaytirah,Onions - Retail,208125,41625,2.15,19360.5
+Aleppo,Wheat flour - Retail,198661,39732,29.67,1339.1
+Aleppo,Wheat flour (local) - Retail,198661,39732,29.67,1339.1
+Aleppo,Bread (bakery) - Retail,198661,39732,129.0,308.0
+Aleppo,Bread (shop) - Retail,198661,39732,129.0,308.0
+Aleppo,Rice - Retail,198661,39732,3.22,12320.0
+Aleppo,Sugar - Retail,198661,39732,3.22,12320.0
+Aleppo,Oil - Retail,198661,39732,3.22,12320.0
+Aleppo,Lentils - Retail,198661,39732,3.22,12320.0
+Aleppo,Chickpeas - Retail,198661,39732,1.07,36960.1
+Aleppo,Beans (white) - Retail,198661,39732,1.07,36960.1
+Aleppo,Salt (iodised) - Retail,198661,39732,0.26,154000.6
+Aleppo,Bulgur - Retail,198661,39732,2.15,18480.1
+Aleppo,Pasta (spaghetti) - Retail,198661,39732,2.15,18480.1
+Aleppo,Tea - Retail,198661,39732,0.43,92400.3
+Aleppo,Eggs - Retail,198661,39732,51.6,770.0
+Aleppo,Tomatoes - Retail,198661,39732,8.6,4620.0
+Aleppo,Potatoes - Retail,198661,39732,6.45,6160.0
+Aleppo,Onions - Retail,198661,39732,2.15,18480.1
+As_Suweida,Wheat flour - Retail,175937,35187,29.67,1186.0
+As_Suweida,Wheat flour (local) - Retail,175937,35187,29.67,1186.0
+As_Suweida,Bread (bakery) - Retail,175937,35187,129.0,272.8
+As_Suweida,Bread (shop) - Retail,175937,35187,129.0,272.8
+As_Suweida,Rice - Retail,175937,35187,3.22,10910.9
+As_Suweida,Sugar - Retail,175937,35187,3.22,10910.9
+As_Suweida,Oil - Retail,175937,35187,3.22,10910.9
+As_Suweida,Lentils - Retail,175937,35187,3.22,10910.9
+As_Suweida,Chickpeas - Retail,175937,35187,1.07,32732.6
+As_Suweida,Beans (white) - Retail,175937,35187,1.07,32732.6
+As_Suweida,Salt (iodised) - Retail,175937,35187,0.26,136385.7
+As_Suweida,Bulgur - Retail,175937,35187,2.15,16366.3
+As_Suweida,Pasta (spaghetti) - Retail,175937,35187,2.15,16366.3
+As_Suweida,Tea - Retail,175937,35187,0.43,81831.4
+As_Suweida,Eggs - Retail,175937,35187,51.6,681.9
+As_Suweida,Tomatoes - Retail,175937,35187,8.6,4091.6
+As_Suweida,Potatoes - Retail,175937,35187,6.45,5455.4
+As_Suweida,Onions - Retail,175937,35187,2.15,16366.3
+City_Damascus,Wheat flour - Retail,284583,56917,29.67,1918.3
+City_Damascus,Wheat flour (local) - Retail,284583,56917,29.67,1918.3
+City_Damascus,Bread (bakery) - Retail,284583,56917,129.0,441.2
+City_Damascus,Bread (shop) - Retail,284583,56917,129.0,441.2
+City_Damascus,Rice - Retail,284583,56917,3.22,17648.6
+City_Damascus,Sugar - Retail,284583,56917,3.22,17648.6
+City_Damascus,Oil - Retail,284583,56917,3.22,17648.6
+City_Damascus,Lentils - Retail,284583,56917,3.22,17648.6
+City_Damascus,Chickpeas - Retail,284583,56917,1.07,52945.7
+City_Damascus,Beans (white) - Retail,284583,56917,1.07,52945.7
+City_Damascus,Salt (iodised) - Retail,284583,56917,0.26,220607.2
+City_Damascus,Bulgur - Retail,284583,56917,2.15,26472.9
+City_Damascus,Pasta (spaghetti) - Retail,284583,56917,2.15,26472.9
+City_Damascus,Tea - Retail,284583,56917,0.43,132364.3
+City_Damascus,Eggs - Retail,284583,56917,51.6,1103.0
+City_Damascus,Tomatoes - Retail,284583,56917,8.6,6618.2
+City_Damascus,Potatoes - Retail,284583,56917,6.45,8824.3
+City_Damascus,Onions - Retail,284583,56917,2.15,26472.9
+Damascus,Wheat flour - Retail,259018,51804,29.67,1746.0
+Damascus,Wheat flour (local) - Retail,259018,51804,29.67,1746.0
+Damascus,Bread (bakery) - Retail,259018,51804,129.0,401.6
+Damascus,Bread (shop) - Retail,259018,51804,129.0,401.6
+Damascus,Rice - Retail,259018,51804,3.22,16063.1
+Damascus,Sugar - Retail,259018,51804,3.22,16063.1
+Damascus,Oil - Retail,259018,51804,3.22,16063.1
+Damascus,Lentils - Retail,259018,51804,3.22,16063.1
+Damascus,Chickpeas - Retail,259018,51804,1.07,48189.4
+Damascus,Beans (white) - Retail,259018,51804,1.07,48189.4
+Damascus,Salt (iodised) - Retail,259018,51804,0.26,200789.0
+Damascus,Bulgur - Retail,259018,51804,2.15,24094.7
+Damascus,Pasta (spaghetti) - Retail,259018,51804,2.15,24094.7
+Damascus,Tea - Retail,259018,51804,0.43,120473.4
+Damascus,Eggs - Retail,259018,51804,51.6,1003.9
+Damascus,Tomatoes - Retail,259018,51804,8.6,6023.7
+Damascus,Potatoes - Retail,259018,51804,6.45,8031.6
+Damascus,Onions - Retail,259018,51804,2.15,24094.7
+Dara,Wheat flour - Retail,176172,35234,29.67,1187.5
+Dara,Wheat flour (local) - Retail,176172,35234,29.67,1187.5
+Dara,Bread (bakery) - Retail,176172,35234,129.0,273.1
+Dara,Bread (shop) - Retail,176172,35234,129.0,273.1
+Dara,Rice - Retail,176172,35234,3.22,10925.4
+Dara,Sugar - Retail,176172,35234,3.22,10925.4
+Dara,Oil - Retail,176172,35234,3.22,10925.4
+Dara,Lentils - Retail,176172,35234,3.22,10925.4
+Dara,Chickpeas - Retail,176172,35234,1.07,32776.2
+Dara,Beans (white) - Retail,176172,35234,1.07,32776.2
+Dara,Salt (iodised) - Retail,176172,35234,0.26,136567.3
+Dara,Bulgur - Retail,176172,35234,2.15,16388.1
+Dara,Pasta (spaghetti) - Retail,176172,35234,2.15,16388.1
+Dara,Tea - Retail,176172,35234,0.43,81940.4
+Dara,Eggs - Retail,176172,35234,51.6,682.8
+Dara,Tomatoes - Retail,176172,35234,8.6,4097.0
+Dara,Potatoes - Retail,176172,35234,6.45,5462.7
+Dara,Onions - Retail,176172,35234,2.15,16388.1
+Dayr_Az_Zor,Wheat flour - Retail,126071,25214,29.67,849.8
+Dayr_Az_Zor,Wheat flour (local) - Retail,126071,25214,29.67,849.8
+Dayr_Az_Zor,Bread (bakery) - Retail,126071,25214,129.0,195.5
+Dayr_Az_Zor,Bread (shop) - Retail,126071,25214,129.0,195.5
+Dayr_Az_Zor,Rice - Retail,126071,25214,3.22,7818.4
+Dayr_Az_Zor,Sugar - Retail,126071,25214,3.22,7818.4
+Dayr_Az_Zor,Oil - Retail,126071,25214,3.22,7818.4
+Dayr_Az_Zor,Lentils - Retail,126071,25214,3.22,7818.4
+Dayr_Az_Zor,Chickpeas - Retail,126071,25214,1.07,23455.1
+Dayr_Az_Zor,Beans (white) - Retail,126071,25214,1.07,23455.1
+Dayr_Az_Zor,Salt (iodised) - Retail,126071,25214,0.26,97729.8
+Dayr_Az_Zor,Bulgur - Retail,126071,25214,2.15,11727.6
+Dayr_Az_Zor,Pasta (spaghetti) - Retail,126071,25214,2.15,11727.6
+Dayr_Az_Zor,Tea - Retail,126071,25214,0.43,58637.9
+Dayr_Az_Zor,Eggs - Retail,126071,25214,51.6,488.6
+Dayr_Az_Zor,Tomatoes - Retail,126071,25214,8.6,2931.9
+Dayr_Az_Zor,Potatoes - Retail,126071,25214,6.45,3909.2
+Dayr_Az_Zor,Onions - Retail,126071,25214,2.15,11727.6
+Hama,Wheat flour - Retail,202000,40400,29.67,1361.6
+Hama,Wheat flour (local) - Retail,202000,40400,29.67,1361.6
+Hama,Bread (bakery) - Retail,202000,40400,129.0,313.2
+Hama,Bread (shop) - Retail,202000,40400,129.0,313.2
+Hama,Rice - Retail,202000,40400,3.22,12527.1
+Hama,Sugar - Retail,202000,40400,3.22,12527.1
+Hama,Oil - Retail,202000,40400,3.22,12527.1
+Hama,Lentils - Retail,202000,40400,3.22,12527.1
+Hama,Chickpeas - Retail,202000,40400,1.07,37581.4
+Hama,Beans (white) - Retail,202000,40400,1.07,37581.4
+Hama,Salt (iodised) - Retail,202000,40400,0.26,156589.1
+Hama,Bulgur - Retail,202000,40400,2.15,18790.7
+Hama,Pasta (spaghetti) - Retail,202000,40400,2.15,18790.7
+Hama,Tea - Retail,202000,40400,0.43,93953.5
+Hama,Eggs - Retail,202000,40400,51.6,782.9
+Hama,Tomatoes - Retail,202000,40400,8.6,4697.7
+Hama,Potatoes - Retail,202000,40400,6.45,6263.6
+Hama,Onions - Retail,202000,40400,2.15,18790.7
+Hassakeh,Wheat flour - Retail,152500,30500,29.67,1028.0
+Hassakeh,Wheat flour (local) - Retail,152500,30500,29.67,1028.0
+Hassakeh,Bread (bakery) - Retail,152500,30500,129.0,236.4
+Hassakeh,Bread (shop) - Retail,152500,30500,129.0,236.4
+Hassakeh,Rice - Retail,152500,30500,3.22,9457.4
+Hassakeh,Sugar - Retail,152500,30500,3.22,9457.4
+Hassakeh,Oil - Retail,152500,30500,3.22,9457.4
+Hassakeh,Lentils - Retail,152500,30500,3.22,9457.4
+Hassakeh,Chickpeas - Retail,152500,30500,1.07,28372.1
+Hassakeh,Beans (white) - Retail,152500,30500,1.07,28372.1
+Hassakeh,Salt (iodised) - Retail,152500,30500,0.26,118217.1
+Hassakeh,Bulgur - Retail,152500,30500,2.15,14186.0
+Hassakeh,Pasta (spaghetti) - Retail,152500,30500,2.15,14186.0
+Hassakeh,Tea - Retail,152500,30500,0.43,70930.2
+Hassakeh,Eggs - Retail,152500,30500,51.6,591.1
+Hassakeh,Tomatoes - Retail,152500,30500,8.6,3546.5
+Hassakeh,Potatoes - Retail,152500,30500,6.45,4728.7
+Hassakeh,Onions - Retail,152500,30500,2.15,14186.0
+Homs,Wheat flour - Retail,186429,37286,29.67,1256.7
+Homs,Wheat flour (local) - Retail,186429,37286,29.67,1256.7
+Homs,Bread (bakery) - Retail,186429,37286,129.0,289.0
+Homs,Bread (shop) - Retail,186429,37286,129.0,289.0
+Homs,Rice - Retail,186429,37286,3.22,11561.5
+Homs,Sugar - Retail,186429,37286,3.22,11561.5
+Homs,Oil - Retail,186429,37286,3.22,11561.5
+Homs,Lentils - Retail,186429,37286,3.22,11561.5
+Homs,Chickpeas - Retail,186429,37286,1.07,34684.4
+Homs,Beans (white) - Retail,186429,37286,1.07,34684.4
+Homs,Salt (iodised) - Retail,186429,37286,0.26,144518.3
+Homs,Bulgur - Retail,186429,37286,2.15,17342.2
+Homs,Pasta (spaghetti) - Retail,186429,37286,2.15,17342.2
+Homs,Tea - Retail,186429,37286,0.43,86711.0
+Homs,Eggs - Retail,186429,37286,51.6,722.6
+Homs,Tomatoes - Retail,186429,37286,8.6,4335.5
+Homs,Potatoes - Retail,186429,37286,6.45,5780.7
+Homs,Onions - Retail,186429,37286,2.15,17342.2
+Idleb,Wheat flour - Retail,213642,42728,29.67,1440.1
+Idleb,Wheat flour (local) - Retail,213642,42728,29.67,1440.1
+Idleb,Bread (bakery) - Retail,213642,42728,129.0,331.2
+Idleb,Bread (shop) - Retail,213642,42728,129.0,331.2
+Idleb,Rice - Retail,213642,42728,3.22,13249.1
+Idleb,Sugar - Retail,213642,42728,3.22,13249.1
+Idleb,Oil - Retail,213642,42728,3.22,13249.1
+Idleb,Lentils - Retail,213642,42728,3.22,13249.1
+Idleb,Chickpeas - Retail,213642,42728,1.07,39747.4
+Idleb,Beans (white) - Retail,213642,42728,1.07,39747.4
+Idleb,Salt (iodised) - Retail,213642,42728,0.26,165614.3
+Idleb,Bulgur - Retail,213642,42728,2.15,19873.7
+Idleb,Pasta (spaghetti) - Retail,213642,42728,2.15,19873.7
+Idleb,Tea - Retail,213642,42728,0.43,99368.6
+Idleb,Eggs - Retail,213642,42728,51.6,828.1
+Idleb,Tomatoes - Retail,213642,42728,8.6,4968.4
+Idleb,Potatoes - Retail,213642,42728,6.45,6624.6
+Idleb,Onions - Retail,213642,42728,2.15,19873.7
+Lattakia,Wheat flour - Retail,225333,45067,29.67,1518.9
+Lattakia,Wheat flour (local) - Retail,225333,45067,29.67,1518.9
+Lattakia,Bread (bakery) - Retail,225333,45067,129.0,349.4
+Lattakia,Bread (shop) - Retail,225333,45067,129.0,349.4
+Lattakia,Rice - Retail,225333,45067,3.22,13974.2
+Lattakia,Sugar - Retail,225333,45067,3.22,13974.2
+Lattakia,Oil - Retail,225333,45067,3.22,13974.2
+Lattakia,Lentils - Retail,225333,45067,3.22,13974.2
+Lattakia,Chickpeas - Retail,225333,45067,1.07,41922.5
+Lattakia,Beans (white) - Retail,225333,45067,1.07,41922.5
+Lattakia,Salt (iodised) - Retail,225333,45067,0.26,174677.0
+Lattakia,Bulgur - Retail,225333,45067,2.15,20961.2
+Lattakia,Pasta (spaghetti) - Retail,225333,45067,2.15,20961.2
+Lattakia,Tea - Retail,225333,45067,0.43,104806.2
+Lattakia,Eggs - Retail,225333,45067,51.6,873.4
+Lattakia,Tomatoes - Retail,225333,45067,8.6,5240.3
+Lattakia,Potatoes - Retail,225333,45067,6.45,6987.1
+Lattakia,Onions - Retail,225333,45067,2.15,20961.2
+Raqqa,Wheat flour - Retail,211250,42250,29.67,1424.0
+Raqqa,Wheat flour (local) - Retail,211250,42250,29.67,1424.0
+Raqqa,Bread (bakery) - Retail,211250,42250,129.0,327.5
+Raqqa,Bread (shop) - Retail,211250,42250,129.0,327.5
+Raqqa,Rice - Retail,211250,42250,3.22,13100.8
+Raqqa,Sugar - Retail,211250,42250,3.22,13100.8
+Raqqa,Oil - Retail,211250,42250,3.22,13100.8
+Raqqa,Lentils - Retail,211250,42250,3.22,13100.8
+Raqqa,Chickpeas - Retail,211250,42250,1.07,39302.3
+Raqqa,Beans (white) - Retail,211250,42250,1.07,39302.3
+Raqqa,Salt (iodised) - Retail,211250,42250,0.26,163759.7
+Raqqa,Bulgur - Retail,211250,42250,2.15,19651.2
+Raqqa,Pasta (spaghetti) - Retail,211250,42250,2.15,19651.2
+Raqqa,Tea - Retail,211250,42250,0.43,98255.8
+Raqqa,Eggs - Retail,211250,42250,51.6,818.8
+Raqqa,Tomatoes - Retail,211250,42250,8.6,4912.8
+Raqqa,Potatoes - Retail,211250,42250,6.45,6550.4
+Raqqa,Onions - Retail,211250,42250,2.15,19651.2
+Tartous,Wheat flour - Retail,341250,68250,29.67,2300.3
+Tartous,Wheat flour (local) - Retail,341250,68250,29.67,2300.3
+Tartous,Bread (bakery) - Retail,341250,68250,129.0,529.1
+Tartous,Bread (shop) - Retail,341250,68250,129.0,529.1
+Tartous,Rice - Retail,341250,68250,3.22,21162.8
+Tartous,Sugar - Retail,341250,68250,3.22,21162.8
+Tartous,Oil - Retail,341250,68250,3.22,21162.8
+Tartous,Lentils - Retail,341250,68250,3.22,21162.8
+Tartous,Chickpeas - Retail,341250,68250,1.07,63488.4
+Tartous,Beans (white) - Retail,341250,68250,1.07,63488.4
+Tartous,Salt (iodised) - Retail,341250,68250,0.26,264534.9
+Tartous,Bulgur - Retail,341250,68250,2.15,31744.2
+Tartous,Pasta (spaghetti) - Retail,341250,68250,2.15,31744.2
+Tartous,Tea - Retail,341250,68250,0.43,158720.9
+Tartous,Eggs - Retail,341250,68250,51.6,1322.7
+Tartous,Tomatoes - Retail,341250,68250,8.6,7936.0
+Tartous,Potatoes - Retail,341250,68250,6.45,10581.4
+Tartous,Onions - Retail,341250,68250,2.15,31744.2
