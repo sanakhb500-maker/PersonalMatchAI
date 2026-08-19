@@ -8,6 +8,7 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
+st.set_page_config(initial_sidebar_state="expanded")
 # ─── Page config ─────────────────────────────────────────────────
 st.set_page_config(
     page_title="AI PersonaMatch — Syria FMCG Intelligence",
