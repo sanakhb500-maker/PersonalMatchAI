@@ -23,6 +23,16 @@ st.markdown("""
 [data-testid="stSidebarContent"] { color: white; }
 #MainMenu, footer, header { visibility: hidden; }
 
+/* Hide the collapse button — sidebar always stays open */
+[data-testid="stSidebarHeader"] button { display: none !important; }
+[data-testid="collapsedControl"] {
+    background: #1a2744 !important;
+    border: 2px solid #4fc3f7 !important;
+    border-radius: 0 12px 12px 0 !important;
+    min-height: 100px !important;
+    min-width: 28px !important;
+}
+[data-testid="collapsedControl"] svg { color: #4fc3f7 !important; }
 .main-title {
     font-size: 2rem; font-weight: 700;
     color: #1F4E79; margin-bottom: 2px;
