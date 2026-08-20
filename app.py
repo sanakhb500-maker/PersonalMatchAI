@@ -188,31 +188,6 @@ def sidebar():
         </div>
         """, unsafe_allow_html=True)
 
-        pages = [
-            ("🏠", "Home",               "Overview & Key Findings"),
-            ("👤", "Consumer Profiles",  "K-Means Segment Analysis"),
-            ("🗺️", "Geographic Maps",    "Spatial Intelligence"),
-            ("💰", "Price Intelligence", "WTP & Affordability"),
-            ("📈", "Forecasting",        "12-Month AI Projections"),
-            ("🏆", "Market Entry",       "Composite Ranking"),
-            ("🎯", "Decision Support",   "Company Advisory Tool"),
-        ]
-
-        if "page" not in st.session_state:
-            st.session_state["page"] = "Home"
-
-        for icon, name, desc in pages:
-            active = st.session_state["page"] == name
-            style  = "background:#2d4a7a; border-radius:8px;" if active else ""
-            st.markdown(
-                f"<div style='{style} padding:2px 0;'></div>",
-                unsafe_allow_html=True
-            )
-            if st.button(f"{icon}  {name}", key=f"nav_{name}",
-                         use_container_width=True, help=desc):
-                st.session_state["page"] = name
-                st.rerun()
-
         st.markdown("---")
         if st.button("🚪  Sign Out", use_container_width=True):
             for key in ["logged_in","username","user_name","user_role","page"]:
@@ -978,8 +953,45 @@ def main():
     data = load_data()
     sidebar()
 
-    page = st.session_state.get("page", "Home")
+# ── Top navigation bar — always visible, never collapsible ────
+    page_keys = [
+        "Home", "Consumer Profiles", "Geographic Maps",
+        "Price Intelligence", "Forecasting",
+        "Market Entry", "Decision Support"
+    ]
+    page_labels = [
+        "🏠 Home", "👤 Profiles", "🗺️ Maps",
+        "💰 Prices", "📈 Forecast",
+        "🏆 Ranking", "🎯 Advisory"
+    ]
 
+    if "page" not in st.session_state:
+        st.session_state["page"] = "Home"
+
+    current_idx = page_keys.index(st.session_state["page"]) \
+                  if st.session_state["page"] in page_keys else 0
+
+    st.markdown("""
+    <div style="background:#1a2744; padding:6px 16px; margin:-1rem -1rem 1.5rem;
+         border-bottom:1px solid #2d4a7a;">
+    </div>
+    """, unsafe_allow_html=True)
+
+    chosen = st.radio(
+        "Navigate",
+        page_labels,
+        index=current_idx,
+        horizontal=True,
+        label_visibility="collapsed",
+        key="top_nav"
+    )
+    selected_page = page_keys[page_labels.index(chosen)]
+    if selected_page != st.session_state["page"]:
+        st.session_state["page"] = selected_page
+        st.rerun()
+
+    page = st.session_state["page"]
+    
     if   page == "Home":              page_home(data)
     elif page == "Consumer Profiles": page_consumer_profiles(data)
     elif page == "Geographic Maps":   page_geographic_maps(data)
