@@ -187,18 +187,7 @@ def sidebar():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Role badge
-        role = st.session_state.get("user_role", "")
-        role_color = {"Admin": "#C62828", "Company": "#2E7D32", "Analyst": "#1F4E79"}.get(role, "#888")
-        st.markdown(f"""
-        <div style="text-align:center; margin:8px 8px 0;">
-            <span style="background:{role_color}; color:white; font-size:0.72rem;
-                 padding:3px 12px; border-radius:999px; font-weight:500;">
-                {role} Access
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
+
         st.markdown("---")
         if st.button("🚪  Sign Out", use_container_width=True):
             for key in ["logged_in","username","user_name","user_role","page"]:
@@ -254,14 +243,7 @@ def page_home(data):
             )
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
-        <span style="background:#1a2744; color:#90CAF9; font-size:0.75rem;
-             padding:4px 14px; border-radius:999px; border:1px solid #2d4a7a;">
-            📅  Data last updated: June 2021 · Source: WFP Food Price Database
-        </span>
-    </div>
-    """, unsafe_allow_html=True)
+
     left, right = st.columns([1.2, 1])
 
     with left:
@@ -328,7 +310,7 @@ def page_home(data):
     st.markdown("---")
     st.markdown("### Market entry quick view")
     if not data["scores"].empty:
-        sc = clean_df_names(data["scores"].sort_values("rank"))
+        sc = data["scores"].sort_values("rank")
         fig = go.Figure(go.Bar(
             x=sc["composite_score"], y=sc["adm1_name"], orientation="h",
             marker_color=[COLORS.get(s, "#888") for s in sc["segment_name"]],
@@ -351,8 +333,8 @@ def page_consumer_profiles(data):
         st.error("Segments data not found in data/ folder.")
         return
 
-    segs = clean_df_names(data["segments"])
-    
+    segs = data["segments"]
+
     seg_info = {
         "Viable coastal & admin markets": {
             "icon": "🟢", "color": "#2E7D32",
@@ -456,19 +438,19 @@ def page_geographic_maps(data):
     """)
 
     st.markdown("---")
-    st.markdown("### Full geographic summary")        
+    st.markdown("### Full geographic summary")
     if not data["segments"].empty:
-            disp = clean_df_names(data["segments"])[[
-                "adm1_name","segment_name","avg_affordability",
-                "volatility_index","avg_basket_cost"
-            ]].copy()
-            disp.columns = ["Governorate","Segment","Avg Affordability",
-                            "Volatility (%)","Avg Basket Cost (SYP)"]
-            disp["Avg Affordability"]      = disp["Avg Affordability"].round(3)
-            disp["Volatility (%)"]         = disp["Volatility (%)"].round(1)
-            disp["Avg Basket Cost (SYP)"]  = disp["Avg Basket Cost (SYP)"].apply(lambda x: f"{x:,.0f}")
-            st.dataframe(disp.sort_values("Avg Affordability", ascending=False),
-                         use_container_width=True, hide_index=True)
+        disp = data["segments"][[
+            "adm1_name","segment_name","avg_affordability",
+            "volatility_index","avg_basket_cost"
+        ]].copy()
+        disp.columns = ["Governorate","Segment","Avg Affordability",
+                        "Volatility (%)","Avg Basket Cost (SYP)"]
+        disp["Avg Affordability"]      = disp["Avg Affordability"].round(3)
+        disp["Volatility (%)"]         = disp["Volatility (%)"].round(1)
+        disp["Avg Basket Cost (SYP)"]  = disp["Avg Basket Cost (SYP)"].apply(lambda x: f"{x:,.0f}")
+        st.dataframe(disp.sort_values("Avg Affordability", ascending=False),
+                     use_container_width=True, hide_index=True)
 
 # ── Price Intelligence ────────────────────────────────────────────
 def page_price_intelligence(data):
@@ -719,8 +701,8 @@ def page_market_entry(data):
         st.error("Scoring data not found.")
         return
 
-    sc = clean_df_names(data["scores"].sort_values("rank"))
-        
+    sc = data["scores"].sort_values("rank")
+
     with st.expander("ℹ️  How the composite score is calculated"):
         dims = [("Purchasing Power","30%"), ("Price Stability","25%"),
                 ("Price Accessibility","25%"), ("Market Density","10%"),
