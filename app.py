@@ -187,7 +187,17 @@ def sidebar():
             </div>
         </div>
         """, unsafe_allow_html=True)
-
+        
+                role = st.session_state.get("user_role", "")
+        role_color = {"Admin": "#C62828", "Company": "#2E7D32", "Analyst": "#1F4E79"}.get(role, "#888")
+        st.markdown(f"""
+        <div style="text-align:center; margin:8px 8px 0;">
+            <span style="background:{role_color}; color:white; font-size:0.72rem;
+                 padding:3px 12px; border-radius:999px; font-weight:500;">
+                {role} Access
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown("---")
         if st.button("🚪  Sign Out", use_container_width=True):
             for key in ["logged_in","username","user_name","user_role","page"]:
