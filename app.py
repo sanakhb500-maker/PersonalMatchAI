@@ -243,6 +243,14 @@ def page_home(data):
             )
 
     st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+        <span style="background:#1a2744; color:#90CAF9; font-size:0.75rem;
+             padding:4px 14px; border-radius:999px; border:1px solid #2d4a7a;">
+            📅  Data last updated: June 2021 · Source: WFP Food Price Database
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
     left, right = st.columns([1.2, 1])
 
