@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -8,7 +7,6 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
-st.set_page_config(initial_sidebar_state="expanded")
 # ─── Page config ─────────────────────────────────────────────────
 st.set_page_config(
     page_title="AI PersonaMatch — Syria FMCG Intelligence",
@@ -24,16 +22,6 @@ st.markdown("""
 [data-testid="stSidebarContent"] { color: white; }
 #MainMenu, footer, header { visibility: hidden; }
 
-/* Hide the collapse button — sidebar always stays open */
-[data-testid="stSidebarHeader"] button { display: none !important; }
-[data-testid="collapsedControl"] {
-    background: #1a2744 !important;
-    border: 2px solid #4fc3f7 !important;
-    border-radius: 0 12px 12px 0 !important;
-    min-height: 100px !important;
-    min-width: 28px !important;
-}
-[data-testid="collapsedControl"] svg { color: #4fc3f7 !important; }
 .main-title {
     font-size: 2rem; font-weight: 700;
     color: #1F4E79; margin-bottom: 2px;
@@ -188,8 +176,48 @@ def sidebar():
         </div>
         """, unsafe_allow_html=True)
 
+        pages = [
+            ("🏠", "Home",               "Overview & Key Findings"),
+            ("👤", "Consumer Profiles",  "K-Means Segment Analysis"),
+            ("🗺️", "Geographic Maps",    "Spatial Intelligence"),
+            ("💰", "Price Intelligence", "WTP & Affordability"),
+            ("📈", "Forecasting",        "12-Month AI Projections"),
+            ("🏆", "Market Entry",       "Composite Ranking"),
+            ("🎯", "Decision Support",   "Company Advisory Tool"),
+        ]
+
+        if "page" not in st.session_state:
+            st.session_state["page"] = "Home"
+
+        for icon, name, desc in pages:
+            active = st.session_state["page"] == name
+            style  = "background:#2d4a7a; border-radius:8px;" if active else ""
+            st.markdown(
+                f"<div style='{style} padding:2px 0;'></div>",
+                unsafe_allow_html=True
+            )
+            if st.button(f"{icon}  {name}", key=f"nav_{name}",
+                         use_container_width=True, help=desc):
+                st.session_state["page"] = name
+                st.rerun()
+
+        role = st.session_state.get("user_role", "")
+        role_color = {
+            "Admin"  : "#C62828",
+            "Company": "#2E7D32",
+            "Analyst": "#1F4E79"
+        }.get(role, "#888")
+        st.markdown(
+            f'''<div style="text-align:center; margin:8px 8px 4px;">
+            <span style="background:{role_color}; color:white; font-size:0.72rem;
+                 padding:3px 12px; border-radius:999px; font-weight:500;">
+                {role} Access
+            </span></div>''',
+            unsafe_allow_html=True
+        )
+
         st.markdown("---")
-        if st.button("🚪  Sign Out", use_container_width=True):
+        if st.button("\U0001f6aa  Sign Out", use_container_width=True):
             for key in ["logged_in","username","user_name","user_role","page"]:
                 st.session_state.pop(key, None)
             st.rerun()
@@ -243,14 +271,6 @@ def page_home(data):
             )
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("""
-    <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
-        <span style="background:#1a2744; color:#90CAF9; font-size:0.75rem;
-             padding:4px 14px; border-radius:999px; border:1px solid #2d4a7a;">
-            📅  Data last updated: June 2021 · Source: WFP Food Price Database
-        </span>
-    </div>
-    """, unsafe_allow_html=True)
 
     left, right = st.columns([1.2, 1])
 
@@ -961,45 +981,8 @@ def main():
     data = load_data()
     sidebar()
 
-# ── Top navigation bar — always visible, never collapsible ────
-    page_keys = [
-        "Home", "Consumer Profiles", "Geographic Maps",
-        "Price Intelligence", "Forecasting",
-        "Market Entry", "Decision Support"
-    ]
-    page_labels = [
-        "🏠 Home", "👤 Profiles", "🗺️ Maps",
-        "💰 Prices", "📈 Forecast",
-        "🏆 Ranking", "🎯 Advisory"
-    ]
+    page = st.session_state.get("page", "Home")
 
-    if "page" not in st.session_state:
-        st.session_state["page"] = "Home"
-
-    current_idx = page_keys.index(st.session_state["page"]) \
-                  if st.session_state["page"] in page_keys else 0
-
-    st.markdown("""
-    <div style="background:#1a2744; padding:6px 16px; margin:-1rem -1rem 1.5rem;
-         border-bottom:1px solid #2d4a7a;">
-    </div>
-    """, unsafe_allow_html=True)
-
-    chosen = st.radio(
-        "Navigate",
-        page_labels,
-        index=current_idx,
-        horizontal=True,
-        label_visibility="collapsed",
-        key="top_nav"
-    )
-    selected_page = page_keys[page_labels.index(chosen)]
-    if selected_page != st.session_state["page"]:
-        st.session_state["page"] = selected_page
-        st.rerun()
-
-    page = st.session_state["page"]
-    
     if   page == "Home":              page_home(data)
     elif page == "Consumer Profiles": page_consumer_profiles(data)
     elif page == "Geographic Maps":   page_geographic_maps(data)
