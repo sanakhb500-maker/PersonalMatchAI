@@ -328,7 +328,7 @@ def page_home(data):
     st.markdown("---")
     st.markdown("### Market entry quick view")
     if not data["scores"].empty:
-        sc = data["scores"].sort_values("rank")
+        sc = clean_df_names(data["scores"].sort_values("rank"))
         fig = go.Figure(go.Bar(
             x=sc["composite_score"], y=sc["adm1_name"], orientation="h",
             marker_color=[COLORS.get(s, "#888") for s in sc["segment_name"]],
@@ -351,8 +351,8 @@ def page_consumer_profiles(data):
         st.error("Segments data not found in data/ folder.")
         return
 
-    segs = data["segments"]
-
+    segs = clean_df_names(data["segments"])
+    
     seg_info = {
         "Viable coastal & admin markets": {
             "icon": "🟢", "color": "#2E7D32",
@@ -456,19 +456,19 @@ def page_geographic_maps(data):
     """)
 
     st.markdown("---")
-    st.markdown("### Full geographic summary")
+    st.markdown("### Full geographic summary")        
     if not data["segments"].empty:
-        disp = data["segments"][[
-            "adm1_name","segment_name","avg_affordability",
-            "volatility_index","avg_basket_cost"
-        ]].copy()
-        disp.columns = ["Governorate","Segment","Avg Affordability",
-                        "Volatility (%)","Avg Basket Cost (SYP)"]
-        disp["Avg Affordability"]      = disp["Avg Affordability"].round(3)
-        disp["Volatility (%)"]         = disp["Volatility (%)"].round(1)
-        disp["Avg Basket Cost (SYP)"]  = disp["Avg Basket Cost (SYP)"].apply(lambda x: f"{x:,.0f}")
-        st.dataframe(disp.sort_values("Avg Affordability", ascending=False),
-                     use_container_width=True, hide_index=True)
+            disp = clean_df_names(data["segments"])[[
+                "adm1_name","segment_name","avg_affordability",
+                "volatility_index","avg_basket_cost"
+            ]].copy()
+            disp.columns = ["Governorate","Segment","Avg Affordability",
+                            "Volatility (%)","Avg Basket Cost (SYP)"]
+            disp["Avg Affordability"]      = disp["Avg Affordability"].round(3)
+            disp["Volatility (%)"]         = disp["Volatility (%)"].round(1)
+            disp["Avg Basket Cost (SYP)"]  = disp["Avg Basket Cost (SYP)"].apply(lambda x: f"{x:,.0f}")
+            st.dataframe(disp.sort_values("Avg Affordability", ascending=False),
+                         use_container_width=True, hide_index=True)
 
 # ── Price Intelligence ────────────────────────────────────────────
 def page_price_intelligence(data):
@@ -719,8 +719,8 @@ def page_market_entry(data):
         st.error("Scoring data not found.")
         return
 
-    sc = data["scores"].sort_values("rank")
-
+    sc = clean_df_names(data["scores"].sort_values("rank"))
+        
     with st.expander("ℹ️  How the composite score is calculated"):
         dims = [("Purchasing Power","30%"), ("Price Stability","25%"),
                 ("Price Accessibility","25%"), ("Market Density","10%"),
