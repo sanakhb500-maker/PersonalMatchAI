@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -8,7 +7,6 @@ import os
 import warnings
 warnings.filterwarnings("ignore")
 
-st.set_page_config(initial_sidebar_state="expanded")
 # ─── Page config ─────────────────────────────────────────────────
 st.set_page_config(
     page_title="AI PersonaMatch — Syria FMCG Intelligence",
@@ -187,6 +185,22 @@ def sidebar():
             </div>
         </div>
         """, unsafe_allow_html=True)
+
+        role = st.session_state.get("user_role", "")
+        role_color = {
+            "Admin"  : "#C62828",
+            "Company": "#2E7D32",
+            "Analyst": "#1F4E79",
+        }.get(role, "#888888")
+        st.markdown(
+            f'''<div style="text-align:center; margin:8px 8px 4px;">
+            <span style="background:{role_color}; color:white;
+                 font-size:0.72rem; padding:3px 14px;
+                 border-radius:999px; font-weight:500;">
+                {role} Access
+            </span></div>''',
+            unsafe_allow_html=True,
+        )
 
         st.markdown("---")
         if st.button("🚪  Sign Out", use_container_width=True):
