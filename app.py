@@ -999,14 +999,37 @@ def main():
     </div>
     """, unsafe_allow_html=True)
 
-    chosen = st.radio(
-        "Navigate",
-        page_labels,
-        index=current_idx,
-        horizontal=True,
-        label_visibility="collapsed",
-        key="top_nav"
-    )
+    nav_col, user_col = st.columns([5, 1])
+
+    with nav_col:
+        chosen = st.radio(
+            "Navigate",
+            page_labels,
+            index=current_idx,
+            horizontal=True,
+            label_visibility="collapsed",
+            key="top_nav"
+        )
+
+    with user_col:
+        role       = st.session_state.get("user_role", "")
+        user_name  = st.session_state.get("user_name", "")
+        role_color = {
+            "Admin"  : "#C62828",
+            "Company": "#2E7D32",
+            "Analyst": "#1F4E79",
+        }.get(role, "#888888")
+        st.markdown(
+            f'''<div style="text-align:right; padding-top:6px;">
+            <div style="font-size:0.72rem; color:#666;">{user_name}</div>
+            <span style="background:{role_color}; color:white;
+                 font-size:0.68rem; padding:2px 10px;
+                 border-radius:999px; font-weight:500;">
+                {role}
+            </span></div>''',
+            unsafe_allow_html=True,
+        )
+
     selected_page = page_keys[page_labels.index(chosen)]
     if selected_page != st.session_state["page"]:
         st.session_state["page"] = selected_page
