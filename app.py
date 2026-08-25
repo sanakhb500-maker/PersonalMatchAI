@@ -77,9 +77,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-    # Apply RTL CSS if Arabic
-    if st.session_state.get("lang", "en") == "ar":
-        st.markdown("""
+# Apply RTL CSS if Arabic
+if st.session_state.get("lang", "en") == "ar":
+    st.markdown("""
         <style>
         body, .stMarkdown, .stText, p, h1, h2, h3, div {
             direction: rtl !important;
@@ -90,7 +90,7 @@ st.markdown("""
         </style>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
         """, unsafe_allow_html=True)
-
+        
 # ─── Users ───────────────────────────────────────────────────────
 USERS = {
     "admin":    {"password": "admin123",   "name": "Administrator",     "role": "Admin"},
