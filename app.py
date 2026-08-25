@@ -228,6 +228,26 @@ COLORS = {
 }
 CUTOFF = pd.Timestamp("2021-06-01")
 
+# Clean display names — remove underscores and standardize
+NAME_MAP = {
+    "City_Damascus" : "Rural Damascus",
+    "Dayr_Az_Zor"   : "Deir ez-Zor",
+    "Al_Qunaytirah" : "Al-Qunaytirah",
+    "As_Suweida"    : "As-Sweida",
+    "Hassakeh"      : "Al-Hasakeh",
+    "Dara"          : "Dar'a",
+    "Idleb"         : "Idlib",
+}
+
+def clean_name(name):
+    return NAME_MAP.get(str(name), str(name))
+
+def clean_col(df, col="adm1_name"):
+    if col in df.columns:
+        df = df.copy()
+        df[col] = df[col].apply(clean_name)
+    return df
+
 # ── Home ──────────────────────────────────────────────────────────
 def page_home(data):
     role = st.session_state.get("user_role", "")
@@ -342,7 +362,7 @@ def page_home(data):
     st.markdown("---")
     st.markdown("### Market entry quick view")
     if not data["scores"].empty:
-        sc = data["scores"].sort_values("rank")
+        sc = clean_col(data["scores"].sort_values("rank"))
         fig = go.Figure(go.Bar(
             x=sc["composite_score"], y=sc["adm1_name"], orientation="h",
             marker_color=[COLORS.get(s, "#888") for s in sc["segment_name"]],
@@ -365,7 +385,7 @@ def page_consumer_profiles(data):
         st.error("Segments data not found in data/ folder.")
         return
 
-    segs = data["segments"]
+    segs = clean_col(data["segments"])
 
     seg_info = {
         "Viable coastal & admin markets": {
@@ -472,7 +492,7 @@ def page_geographic_maps(data):
     st.markdown("---")
     st.markdown("### Full geographic summary")
     if not data["segments"].empty:
-        disp = data["segments"][[
+        disp = clean_col(data["segments"])[[
             "adm1_name","segment_name","avg_affordability",
             "volatility_index","avg_basket_cost"
         ]].copy()
@@ -532,7 +552,7 @@ def page_price_intelligence(data):
         if data["wtp"].empty:
             st.info("WTP data not found.")
         else:
-            wtp = data["wtp"]
+            wtp = clean_col(data["wtp"])
             c1, c2 = st.columns(2)
             with c1:
                 gov = st.selectbox("Select Governorate",
@@ -733,7 +753,7 @@ def page_market_entry(data):
         st.error("Scoring data not found.")
         return
 
-    sc = data["scores"].sort_values("rank")
+    sc = clean_col(data["scores"].sort_values("rank"))
 
     with st.expander("ℹ️  How the composite score is calculated"):
         dims = [("Purchasing Power","30%"), ("Price Stability","25%"),
@@ -907,7 +927,7 @@ def page_decision_support(data):
             st.error("Scoring data unavailable.")
             return
 
-        sc  = data["scores"].sort_values("rank")
+        sc  = clean_col(data["scores"].sort_values("rank"))
         min_score = {"Very Low":75,"Low":65,"Medium":55,"High":45,"Very High":30}[risk]
         rec = sc[sc["composite_score"] >= min_score]
 
