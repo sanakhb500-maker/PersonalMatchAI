@@ -230,6 +230,16 @@ CUTOFF = pd.Timestamp("2021-06-01")
 
 # ── Home ──────────────────────────────────────────────────────────
 def page_home(data):
+    role = st.session_state.get("user_role", "")
+    if role == "Company":
+        st.markdown("""
+        <div style="background:#1F4E79; color:#BDD7EE; padding:8px 16px;
+             border-radius:8px; font-size:0.82rem; margin-bottom:12px;">
+            🏢  <b>Company Access</b> — You have access to Geographic Maps,
+            Price Intelligence, Market Entry Ranking, and the Decision Support tool.
+        </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("<h1 class=\"main-title\">🎯  AI PersonaMatch</h1>", unsafe_allow_html=True)
     st.markdown(
         "<p class=\"sub-title\">Syria FMCG Consumer Intelligence Platform — "
@@ -976,22 +986,38 @@ def main():
     sidebar()
 
 # ── Top navigation bar — always visible, never collapsible ────
-    page_keys = [
-        "Home", "Consumer Profiles", "Geographic Maps",
-        "Price Intelligence", "Forecasting",
-        "Market Entry", "Decision Support"
+    # Pages available per role
+    role = st.session_state.get("user_role", "Analyst")
+
+    ALL_PAGES = [
+        ("Home",              "🏠 Home"),
+        ("Consumer Profiles", "👤 Profiles"),
+        ("Geographic Maps",   "🗺️ Maps"),
+        ("Price Intelligence","💰 Prices"),
+        ("Forecasting",       "📈 Forecast"),
+        ("Market Entry",      "🏆 Ranking"),
+        ("Decision Support",  "🎯 Advisory"),
     ]
-    page_labels = [
-        "🏠 Home", "👤 Profiles", "🗺️ Maps",
-        "💰 Prices", "📈 Forecast",
-        "🏆 Ranking", "🎯 Advisory"
+
+    COMPANY_PAGES = [
+        ("Home",              "🏠 Home"),
+        ("Geographic Maps",   "🗺️ Maps"),
+        ("Price Intelligence","💰 Prices"),
+        ("Market Entry",      "🏆 Ranking"),
+        ("Decision Support",  "🎯 Advisory"),
     ]
+
+    page_list   = COMPANY_PAGES if role == "Company" else ALL_PAGES
+    page_keys   = [p[0] for p in page_list]
+    page_labels = [p[1] for p in page_list]
 
     if "page" not in st.session_state:
         st.session_state["page"] = "Home"
 
-    current_idx = page_keys.index(st.session_state["page"]) \
-                  if st.session_state["page"] in page_keys else 0
+    # If current page not available for this role, reset to Home
+    if st.session_state["page"] not in page_keys:
+        st.session_state["page"] = "Home"
+    current_idx = page_keys.index(st.session_state["page"])
 
     st.markdown("""
     <div style="background:#1a2744; padding:6px 16px; margin:-1rem -1rem 1.5rem;
