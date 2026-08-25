@@ -329,6 +329,107 @@ def T(key, lang=None):
         lang = st.session_state.get("lang", "en")
     return TRANS.get(lang, TRANS["en"]).get(key, TRANS["en"].get(key, key))
 
+# ─── Page-level translations ──────────────────────────────────────
+TRANS_PAGES = {
+    "en": {
+        "profiles_title" : "## 👤  Consumer Profiles",
+        "profiles_sub"   : "*K-Means ML identified 3 natural consumer segments across Syria's 14 governorates*",
+        "profiles_seg"   : "### Segment positioning — Volatility vs Affordability",
+        "profiles_about" : "About this segment",
+        "profiles_strat" : "Recommended strategy",
+        "profiles_govs"  : "Governorates",
+        "maps_title"     : "## 🗺️  Geographic Intelligence",
+        "maps_sub"       : "*Three interactive maps — hover over any governorate for detailed analytics*",
+        "maps_summary"   : "### Full geographic summary",
+        "maps_tabs"      : ["🟢🟠🔴  Consumer Segments","💚  Affordability Heatmap","🔴  Price Volatility Risk"],
+        "price_title"    : "## 💰  Price Intelligence",
+        "price_sub"      : "*Income share burden, willingness-to-pay thresholds, and market price accessibility*",
+        "price_tabs"     : ["📊  Income Share per Product","🎯  WTP Calculator","🍞  Bread Affordability Gap"],
+        "price_wtp_gov"  : "Select Governorate",
+        "price_wtp_com"  : "Select Commodity",
+        "price_wtp_inc"  : "Monthly Income (SYP)",
+        "price_wtp_bud"  : "20% Budget (SYP)",
+        "price_wtp_ceil" : "WTP Ceiling / unit",
+        "price_wtp_all"  : "#### WTP ceiling across all governorates",
+        "forecast_title" : "## 📈  Demand Forecasting",
+        "forecast_sub"   : "*Prophet AI time series — trained on 124 months, projecting 12 months forward*",
+        "forecast_tabs"  : ["🛒  Basket Cost Forecast","💸  Affordability Forecast","📍  Segment Forecasts"],
+        "forecast_seg_note": "*One representative governorate per consumer segment*",
+        "ranking_title"  : "## 🏆  Market Entry Ranking",
+        "ranking_sub"    : "*Composite scoring model — ranked by commercial attractiveness*",
+        "ranking_tabs"   : ["📊  Full Ranking","🕸️  Radar Profile","📋  Recommendations"],
+        "ranking_how"    : "ℹ️  How the composite score is calculated",
+        "advisory_title" : "## 🎯  Decision Support Tool",
+        "advisory_sub"   : "*Enter your product and investment context — receive a data-driven market entry recommendation*",
+        "advisory_input" : "### Advisory input",
+        "advisory_prod"  : "Product category",
+        "advisory_risk"  : "Risk tolerance",
+        "advisory_horiz" : "Entry timeline",
+        "advisory_btn"   : "🎯  Generate Recommendation",
+        "advisory_all"   : "#### All qualifying markets",
+        "method_title"   : "## 📖  Methodology",
+        "method_sub"     : "*Full documentation of data sources, analytical methods, and platform architecture*",
+        "method_ds"      : "### Data source",
+        "method_modules" : "### Five analytical modules",
+        "method_limits"  : "### Limitations and notes",
+        "method_tech"    : "### Technology stack",
+    },
+    "ar": {
+        "profiles_title" : "## 👤  ملفات المستهلكين",
+        "profiles_sub"   : "*حدّد K-Means 3 شرائح استهلاكية طبيعية عبر 14 محافظة سورية*",
+        "profiles_seg"   : "### تموضع الشرائح — التذبذب مقابل القدرة الشرائية",
+        "profiles_about" : "عن هذه الشريحة",
+        "profiles_strat" : "الاستراتيجية الموصى بها",
+        "profiles_govs"  : "المحافظات",
+        "maps_title"     : "## 🗺️  الذكاء الجغرافي",
+        "maps_sub"       : "*ثلاث خرائط تفاعلية — مرّر فوق أي محافظة للاطلاع على التحليلات*",
+        "maps_summary"   : "### الملخص الجغرافي الكامل",
+        "maps_tabs"      : ["🟢🟠🔴  شرائح المستهلكين","💚  خريطة حرارية للقدرة الشرائية","🔴  مخاطر تذبذب الأسعار"],
+        "price_title"    : "## 💰  ذكاء الأسعار",
+        "price_sub"      : "*عبء حصة الدخل وحدود الاستعداد للدفع وإمكانية الوصول إلى السوق*",
+        "price_tabs"     : ["📊  حصة الدخل لكل منتج","🎯  حاسبة الاستعداد للدفع","🍞  فجوة تحمّل سعر الخبز"],
+        "price_wtp_gov"  : "اختر المحافظة",
+        "price_wtp_com"  : "اختر السلعة",
+        "price_wtp_inc"  : "الدخل الشهري (ل.س)",
+        "price_wtp_bud"  : "20% من الميزانية (ل.س)",
+        "price_wtp_ceil" : "سقف الاستعداد للدفع / وحدة",
+        "price_wtp_all"  : "#### سقف الاستعداد للدفع عبر جميع المحافظات",
+        "forecast_title" : "## 📈  التنبؤ بالطلب",
+        "forecast_sub"   : "*نموذج Prophet AI — مُدرَّب على 124 شهراً، مع توقعات 12 شهراً قادمة*",
+        "forecast_tabs"  : ["🛒  توقع تكلفة السلة","💸  توقع القدرة الشرائية","📍  توقعات الشرائح"],
+        "forecast_seg_note": "*محافظة تمثيلية لكل شريحة استهلاكية*",
+        "ranking_title"  : "## 🏆  تصنيف دخول السوق",
+        "ranking_sub"    : "*نموذج تسجيل مركّب — مُصنَّف حسب الجاذبية التجارية*",
+        "ranking_tabs"   : ["📊  التصنيف الكامل","🕸️  الملف الشعاعي","📋  التوصيات"],
+        "ranking_how"    : "ℹ️  كيف يُحسب الدرجة المركّبة",
+        "advisory_title" : "## 🎯  أداة دعم القرار",
+        "advisory_sub"   : "*أدخل فئة منتجك وسياق استثمارك — احصل على توصية مبنية على البيانات*",
+        "advisory_input" : "### مدخلات الاستشارة",
+        "advisory_prod"  : "فئة المنتج",
+        "advisory_risk"  : "مستوى تحمّل المخاطر",
+        "advisory_horiz" : "الجدول الزمني للدخول",
+        "advisory_btn"   : "🎯  توليد التوصية",
+        "advisory_all"   : "#### جميع الأسواق المؤهّلة",
+        "method_title"   : "## 📖  المنهجية",
+        "method_sub"     : "*التوثيق الكامل لمصادر البيانات والأساليب التحليلية وبنية المنصة*",
+        "method_ds"      : "### مصدر البيانات",
+        "method_modules" : "### خمس وحدات تحليلية",
+        "method_limits"  : "### القيود والملاحظات",
+        "method_tech"    : "### مجموعة التقنيات",
+    },
+}
+
+def TP(key, lang=None):
+    """Page-level translation helper"""
+    if lang is None:
+        lang = st.session_state.get("lang", "en")
+    val = TRANS_PAGES.get(lang, TRANS_PAGES["en"]).get(key)
+    if val is None:
+        val = TRANS_PAGES["en"].get(key, key)
+    return val
+
+
+
 
 COLORS = {
     "Viable coastal & admin markets"  : "#2E7D32",
@@ -455,8 +556,9 @@ def page_home(data):
 
 # ── Consumer Profiles ─────────────────────────────────────────────
 def page_consumer_profiles(data):
-    st.markdown("## 👤  Consumer Profiles")
-    st.markdown("*K-Means machine learning identified 3 natural consumer segments across Syria's 14 governorates*")
+    lang = st.session_state.get("lang","en")
+    st.markdown(TP("profiles_title",lang))
+    st.markdown(TP("profiles_sub",lang))
 
     if data["segments"].empty:
         st.error("Segments data not found in data/ folder.")
@@ -504,7 +606,7 @@ def page_consumer_profiles(data):
                     st.metric("Avg Price Volatility", f"{avg_v:.1f}%")
 
     st.markdown("---")
-    st.markdown("### Segment positioning — Volatility vs Affordability")
+    st.markdown(TP("profiles_seg",lang))
     fig = px.scatter(
         segs,
         x="volatility_index", y="avg_affordability",
@@ -526,14 +628,11 @@ def page_consumer_profiles(data):
 
 # ── Geographic Maps ───────────────────────────────────────────────
 def page_geographic_maps(data):
-    st.markdown("## 🗺️  Geographic Intelligence")
-    st.markdown("*Three interactive maps — hover over any governorate for detailed analytics*")
+    lang = st.session_state.get("lang","en")
+    st.markdown(TP("maps_title",lang))
+    st.markdown(TP("maps_sub",lang))
 
-    tab1, tab2, tab3 = st.tabs([
-        "🟢🟠🔴  Consumer Segments",
-        "💚  Affordability Heatmap",
-        "🔴  Price Volatility Risk",
-    ])
+    tab1, tab2, tab3 = st.tabs(TP("maps_tabs",lang))
 
     def load_map(filename, tab, description):
         with tab:
@@ -567,7 +666,7 @@ def page_geographic_maps(data):
     """)
 
     st.markdown("---")
-    st.markdown("### Full geographic summary")
+    st.markdown(TP("maps_summary",lang))
     if not data["segments"].empty:
         disp = clean_col(data["segments"])[[
             "adm1_name","segment_name","avg_affordability",
@@ -583,14 +682,11 @@ def page_geographic_maps(data):
 
 # ── Price Intelligence ────────────────────────────────────────────
 def page_price_intelligence(data):
-    st.markdown("## 💰  Price Intelligence")
-    st.markdown("*Income share burden, willingness-to-pay thresholds, and market price accessibility*")
+    lang = st.session_state.get("lang","en")
+    st.markdown(TP("price_title",lang))
+    st.markdown(TP("price_sub",lang))
 
-    tab1, tab2, tab3 = st.tabs([
-        "📊  Income Share per Product",
-        "🎯  WTP Calculator",
-        "🍞  Bread Affordability Gap",
-    ])
+    tab1, tab2, tab3 = st.tabs(TP("price_tabs",lang))
 
     # ── Tab 1 ─────────────────────────────────────────────────────
     with tab1:
@@ -632,19 +728,19 @@ def page_price_intelligence(data):
             wtp = clean_col(data["wtp"])
             c1, c2 = st.columns(2)
             with c1:
-                gov = st.selectbox("Select Governorate",
+                gov = st.selectbox(TP("price_wtp_gov",lang),
                                    sorted(wtp["adm1_name"].unique()), key="wtp_gov")
             with c2:
-                com = st.selectbox("Select Commodity",
+                com = st.selectbox(TP("price_wtp_com",lang),
                                    sorted(wtp["commodity"].unique()), key="wtp_com")
 
             row = wtp[(wtp["adm1_name"]==gov) & (wtp["commodity"]==com)]
             if not row.empty:
                 r = row.iloc[0]
                 ca, cb, cc = st.columns(3)
-                ca.metric("Monthly Income (SYP)", f"{r['monthly_income']:,.0f}")
-                cb.metric("20% Budget (SYP)",     f"{r['max_budget_syp']:,.0f}")
-                cc.metric("WTP Ceiling / unit",   f"{r['wtp_ceiling_syp']:,.1f} SYP")
+                ca.metric(TP("price_wtp_inc",lang), f"{r['monthly_income']:,.0f}")
+                cb.metric(TP("price_wtp_bud",lang), f"{r['max_budget_syp']:,.0f}")
+                cc.metric(TP("price_wtp_ceil",lang), f"{r['wtp_ceiling_syp']:,.1f} SYP")
 
                 st.markdown(f"""
                 <div class="finding">
@@ -656,7 +752,7 @@ def page_price_intelligence(data):
                 </div>
                 """, unsafe_allow_html=True)
 
-            st.markdown("#### WTP ceiling across all governorates")
+            st.markdown(TP("price_wtp_all",lang))
             wtp_com = wtp[wtp["commodity"]==com].sort_values("wtp_ceiling_syp", ascending=False)
             if not data["scores"].empty:
                 wtp_com = wtp_com.merge(
@@ -711,14 +807,11 @@ def page_price_intelligence(data):
 
 # ── Forecasting ───────────────────────────────────────────────────
 def page_forecasting(data):
-    st.markdown("## 📈  Demand Forecasting")
-    st.markdown("*Prophet AI time series model — trained on 124 months of historical data, projecting 12 months forward*")
+    lang = st.session_state.get("lang","en")
+    st.markdown(TP("forecast_title",lang))
+    st.markdown(TP("forecast_sub",lang))
 
-    tab1, tab2, tab3 = st.tabs([
-        "🛒  Basket Cost Forecast",
-        "💸  Affordability Forecast",
-        "📍  Segment Forecasts",
-    ])
+    tab1, tab2, tab3 = st.tabs(TP("forecast_tabs",lang))
 
     def forecast_chart(fc, title, y_label, color, threshold=None):
         if fc.empty:
@@ -790,7 +883,7 @@ def page_forecasting(data):
         """, unsafe_allow_html=True)
 
     with tab3:
-        st.markdown("*One representative governorate per consumer segment*")
+        st.markdown(TP("forecast_seg_note",lang))
         fig3 = go.Figure()
         govs = {
             "Tartous": ("#2E7D32", data["forecast_tartous"]),
@@ -823,8 +916,9 @@ def page_forecasting(data):
 
 # ── Market Entry ──────────────────────────────────────────────────
 def page_market_entry(data):
-    st.markdown("## 🏆  Market Entry Ranking")
-    st.markdown("*Composite scoring model combining all 5 analytical modules — ranked by commercial attractiveness*")
+    lang = st.session_state.get("lang","en")
+    st.markdown(TP("ranking_title",lang))
+    st.markdown(TP("ranking_sub",lang))
 
     if data["scores"].empty:
         st.error("Scoring data not found.")
@@ -832,7 +926,7 @@ def page_market_entry(data):
 
     sc = clean_col(data["scores"].sort_values("rank"))
 
-    with st.expander("ℹ️  How the composite score is calculated"):
+    with st.expander(TP("ranking_how",lang)):
         dims = [("Purchasing Power","30%"), ("Price Stability","25%"),
                 ("Price Accessibility","25%"), ("Market Density","10%"),
                 ("Segment Quality","10%")]
@@ -848,7 +942,7 @@ def page_market_entry(data):
                 """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    tab1, tab2, tab3 = st.tabs(["📊  Full Ranking", "🕸️  Radar Profile", "📋  Recommendations"])
+    tab1, tab2, tab3 = st.tabs(TP("ranking_tabs",lang))
 
     with tab1:
         fig = go.Figure(go.Bar(
@@ -967,8 +1061,9 @@ def page_market_entry(data):
 
 # ── Decision Support ──────────────────────────────────────────────
 def page_decision_support(data):
-    st.markdown("## 🎯  Decision Support Tool")
-    st.markdown("*Enter your product and investment context — receive a data-driven market entry recommendation*")
+    lang = st.session_state.get("lang","en")
+    st.markdown(TP("advisory_title",lang))
+    st.markdown(TP("advisory_sub",lang))
 
     st.markdown("""
     <div class="insight">
@@ -977,7 +1072,7 @@ def page_decision_support(data):
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Advisory input")
+    st.markdown(TP("advisory_input",lang))
     c1, c2, c3 = st.columns(3)
     with c1:
         product = st.selectbox("Product category", [
@@ -999,7 +1094,7 @@ def page_decision_support(data):
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if st.button("🎯  Generate Recommendation", type="primary", use_container_width=True):
+    if st.button(TP("advisory_btn",lang), type="primary", use_container_width=True):
         if data["scores"].empty:
             st.error("Scoring data unavailable.")
             return
@@ -1062,7 +1157,7 @@ def page_decision_support(data):
             </div>
             """, unsafe_allow_html=True)
 
-        st.markdown("#### All qualifying markets")
+        st.markdown(TP("advisory_all",lang))
         disp = rec[["rank","adm1_name","segment_name","composite_score"]].copy()
         disp.columns = ["Rank","Governorate","Consumer Segment","Score"]
         disp["Score"] = disp["Score"].round(1)
@@ -1074,10 +1169,11 @@ def page_decision_support(data):
 
 # ── Methodology ───────────────────────────────────────────────────
 def page_methodology(data):
-    st.markdown("## 📖  Methodology")
-    st.markdown("*Full documentation of data sources, analytical methods, and platform architecture*")
+    lang = st.session_state.get("lang","en")
+    st.markdown(TP("method_title",lang))
+    st.markdown(TP("method_sub",lang))
 
-    st.markdown("### Data source")
+    st.markdown(TP("method_ds",lang))
     st.markdown("""
     <div class="insight">
         <b>Primary dataset:</b> WFP (World Food Programme) Food Price Monitoring Database
@@ -1104,7 +1200,7 @@ def page_methodology(data):
             </div>
             """, unsafe_allow_html=True)
 
-    st.markdown("### Five analytical modules")
+    st.markdown(TP("method_modules",lang))
     modules = [
         ("A", "Consumer Segmentation",
          "K-Means clustering (unsupervised machine learning)",
@@ -1149,7 +1245,7 @@ def page_methodology(data):
             with c2:
                 st.markdown(f"**Description:** {desc}")
 
-    st.markdown("### Limitations and notes")
+    st.markdown(TP("method_limits",lang))
     st.markdown("""
     <div class="warning">
         <b>Data cutoff:</b> The WFP dataset covers April 2011 through June 2021.
@@ -1169,7 +1265,7 @@ def page_methodology(data):
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### Technology stack")
+    st.markdown(TP("method_tech",lang))
     tech = [
         ("Python 3.12",      "Core programming language"),
         ("Pandas + NumPy",   "Data processing and feature engineering"),
