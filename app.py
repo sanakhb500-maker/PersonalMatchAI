@@ -77,6 +77,20 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+    # Apply RTL CSS if Arabic
+    if st.session_state.get("lang", "en") == "ar":
+        st.markdown("""
+        <style>
+        body, .stMarkdown, .stText, p, h1, h2, h3, div {
+            direction: rtl !important;
+            text-align: right !important;
+            font-family: 'Noto Sans Arabic', 'Arial', sans-serif !important;
+        }
+        .stRadio > div { flex-direction: row-reverse !important; }
+        </style>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+        """, unsafe_allow_html=True)
+
 # ─── Users ───────────────────────────────────────────────────────
 USERS = {
     "admin":    {"password": "admin123",   "name": "Administrator",     "role": "Admin"},
@@ -203,7 +217,8 @@ def sidebar():
         )
 
         st.markdown("---")
-        if st.button("🚪  Sign Out", use_container_width=True):
+        lang_sb = st.session_state.get("lang", "en")
+        if st.button(T("sign_out", lang_sb), use_container_width=True):
             for key in ["logged_in","username","user_name","user_role","page"]:
                 st.session_state.pop(key, None)
             st.rerun()
@@ -220,6 +235,100 @@ def sidebar():
 # ─────────────────────────────────────────────────────────────────
 # PAGES
 # ─────────────────────────────────────────────────────────────────
+
+
+# ─── Translations ────────────────────────────────────────────────
+TRANS = {
+    "en": {
+        "nav": ["🏠 Home","👤 Profiles","🗺️ Maps","💰 Prices",
+                "📈 Forecast","🏆 Ranking","🎯 Advisory","📖 Method"],
+        "nav_company": ["🏠 Home","🗺️ Maps","💰 Prices","🏆 Ranking","🎯 Advisory"],
+        "sign_out"      : "🚪  Sign Out",
+        "signed_in_as"  : "Signed in as",
+        "data_updated"  : "📅  Data last updated: June 2021 · Source: WFP",
+        "company_msg"   : "🏢  Company Access — Geographic Maps, Price Intelligence, Market Entry Ranking, and Decision Support.",
+        "home_title"    : "🎯  AI PersonaMatch",
+        "home_sub"      : "Syria FMCG Consumer Intelligence Platform — Precision Demand Forecasting & Consumer-Centric Analytics",
+        "what_title"    : "What this platform does",
+        "what_1"        : "<b>AI PersonaMatch</b> answers the core business question for Syria's reconstruction market: <b>Who buys what, where, and when?</b>",
+        "what_2"        : "It transforms WFP humanitarian monitoring data into commercial consumer intelligence — the only structured, data-driven FMCG analytics tool built specifically for the Syrian market.",
+        "modules_title" : "Five analytical modules",
+        "findings_title": "Key findings",
+        "quickview"     : "Market entry quick view",
+        "kpi_labels"    : ["Price observations","Governorates","Months of data","Market locations","FMCG products"],
+        "login_title"   : "AI PersonaMatch",
+        "login_sub"     : "Syria FMCG Consumer Intelligence Platform",
+        "login_tag"     : "Precision Demand Forecasting · Consumer-Centric Analytics",
+        "login_user"    : "Username",
+        "login_pass"    : "Password",
+        "login_btn"     : "Sign In",
+        "login_err"     : "Invalid username or password",
+        "login_demo"    : "Demo credentials:",
+        "findings": [
+            ("🏆","Tartous ranks #1 (84.9/100)","Highest purchasing power and price stability in Syria"),
+            ("📍","3 distinct consumer segments","Coastal viable, stressed interior, fragmented urban"),
+            ("💸","67.4% of region-months are food insecure","Households cannot afford the basic food basket"),
+            ("🍞","Idlib crisis detected","Actual bread price is 4× above what households can afford"),
+            ("📈","Basket cost projected to 1.2M SYP","By March 2022 — Prophet AI detected structural price break"),
+            ("🌙","Ramadan seasonal signal found","Prophet detected shifting annual demand peaks from price data"),
+        ],
+        "modules_list": [
+            ("A","Consumer Segmentation","K-Means ML → 3 distinct consumer profiles"),
+            ("B","Geographic Demand Maps","Interactive Syria choropleth maps"),
+            ("C","Price Sensitivity","WTP thresholds & income share analysis"),
+            ("D","Demand Forecasting","Prophet AI → 12-month projections"),
+            ("E","Market Entry Scoring","Composite ranking of all 14 governorates"),
+        ],
+    },
+    "ar": {
+        "nav": ["🏠 الرئيسية","👤 الملفات","🗺️ الخرائط","💰 الأسعار",
+                "📈 التنبؤ","🏆 التصنيف","🎯 الاستشارة","📖 المنهجية"],
+        "nav_company": ["🏠 الرئيسية","🗺️ الخرائط","💰 الأسعار","🏆 التصنيف","🎯 الاستشارة"],
+        "sign_out"      : "🚪  تسجيل الخروج",
+        "signed_in_as"  : "مسجّل الدخول بوصفك",
+        "data_updated"  : "📅  آخر تحديث: يونيو 2021 · المصدر: برنامج الغذاء العالمي",
+        "company_msg"   : "🏢  وصول الشركة — الخرائط الجغرافية وذكاء الأسعار وتصنيف دخول السوق وأداة دعم القرار.",
+        "home_title"    : "🎯  AI PersonaMatch",
+        "home_sub"      : "منصة ذكاء المستهلك للسلع الاستهلاكية في سوريا — تنبؤ دقيق بالطلب وتحليلات متمحورة حول المستهلك",
+        "what_title"    : "ما الذي تفعله هذه المنصة",
+        "what_1"        : "<b>AI PersonaMatch</b> يجيب على السؤال التجاري الجوهري لسوق إعادة الإعمار السوري: <b>من يشتري ماذا، وأين، ومتى؟</b>",
+        "what_2"        : "يحوّل بيانات برنامج الغذاء العالمي الإنسانية إلى ذكاء تجاري — الأداة الوحيدة المبنية على البيانات لتحليل السوق الاستهلاكية السورية.",
+        "modules_title" : "خمس وحدات تحليلية",
+        "findings_title": "النتائج الرئيسية",
+        "quickview"     : "نظرة سريعة على دخول السوق",
+        "kpi_labels"    : ["سجل أسعار","محافظة","شهراً من البيانات","موقع سوق","منتج استهلاكي"],
+        "login_title"   : "AI PersonaMatch",
+        "login_sub"     : "منصة ذكاء المستهلك للسلع الاستهلاكية في سوريا",
+        "login_tag"     : "تنبؤ دقيق بالطلب · تحليلات متمحورة حول المستهلك",
+        "login_user"    : "اسم المستخدم",
+        "login_pass"    : "كلمة المرور",
+        "login_btn"     : "تسجيل الدخول",
+        "login_err"     : "اسم المستخدم أو كلمة المرور غير صحيحة",
+        "login_demo"    : "بيانات اعتماد تجريبية:",
+        "findings": [
+            ("🏆","طرطوس في المرتبة الأولى (84.9/100)","أعلى قدرة شرائية واستقرار في الأسعار في سوريا"),
+            ("📍","3 شرائح استهلاكية مميزة","الساحل الجديد، الداخل المتأزم، المراكز الحضرية المجزأة"),
+            ("💸","67.4% من الفترات الإقليمية تعاني انعدام الأمن الغذائي","الأسر لا تستطيع تحمّل تكلفة السلة الغذائية الأساسية"),
+            ("🍞","أزمة إدلب مرصودة","سعر الخبز الفعلي يتجاوز 4 أضعاف ما يمكن للأسر تحمّله"),
+            ("📈","تكلفة السلة متجهة نحو 1.2 مليون ل.س","بحلول مارس 2022 — Prophet AI رصد كسراً هيكلياً في الأسعار"),
+            ("🌙","رصد إشارة موسمية رمضانية","Prophet رصد ذُرى طلب سنوية متحركة من بيانات الأسعار"),
+        ],
+        "modules_list": [
+            ("A","تجميع المستهلكين","K-Means ML → 3 ملفات تعريفية مميزة"),
+            ("B","خرائط الطلب الجغرافي","خرائط كوروبليث تفاعلية لسوريا"),
+            ("C","حساسية الأسعار","حدود الاستعداد للدفع وتحليل حصة الدخل"),
+            ("D","التنبؤ بالطلب","Prophet AI → توقعات 12 شهراً"),
+            ("E","تسجيل دخول السوق","تصنيف مركّب لجميع المحافظات الـ 14"),
+        ],
+    },
+}
+
+def T(key, lang=None):
+    """Return translated string for current language"""
+    if lang is None:
+        lang = st.session_state.get("lang", "en")
+    return TRANS.get(lang, TRANS["en"]).get(key, TRANS["en"].get(key, key))
+
 
 COLORS = {
     "Viable coastal & admin markets"  : "#2E7D32",
@@ -250,31 +359,25 @@ def clean_col(df, col="adm1_name"):
 
 # ── Home ──────────────────────────────────────────────────────────
 def page_home(data):
+    lang = st.session_state.get("lang", "en")
     role = st.session_state.get("user_role", "")
     if role == "Company":
-        st.markdown("""
+        st.markdown(f"""
         <div style="background:#1F4E79; color:#BDD7EE; padding:8px 16px;
              border-radius:8px; font-size:0.82rem; margin-bottom:12px;">
-            🏢  <b>Company Access</b> — You have access to Geographic Maps,
-            Price Intelligence, Market Entry Ranking, and the Decision Support tool.
+            {T("company_msg", lang)}
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<h1 class=\"main-title\">🎯  AI PersonaMatch</h1>", unsafe_allow_html=True)
-    st.markdown(
-        "<p class=\"sub-title\">Syria FMCG Consumer Intelligence Platform — "
-        "Precision Demand Forecasting & Consumer-Centric Analytics</p>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"<h1 class=\"main-title\">{T('home_title', lang)}</h1>",
+                unsafe_allow_html=True)
+    st.markdown(f"<p class=\"sub-title\">{T('home_sub', lang)}</p>",
+                unsafe_allow_html=True)
 
     # KPI strip
-    kpis = [
-        ("116,588", "Price observations"),
-        ("14",      "Governorates"),
-        ("124",     "Months of data"),
-        ("96",      "Market locations"),
-        ("35",      "FMCG products"),
-    ]
+    kpi_nums    = ["116,588","14","124","96","35"]
+    kpi_labels  = T("kpi_labels", lang)
+    kpis        = list(zip(kpi_nums, kpi_labels))
     cols = st.columns(5)
     for col, (num, lbl) in zip(cols, kpis):
         with col:
@@ -287,11 +390,11 @@ def page_home(data):
             )
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("""
+    st.markdown(f"""
     <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
         <span style="background:#1a2744; color:#90CAF9; font-size:0.75rem;
              padding:4px 14px; border-radius:999px; border:1px solid #2d4a7a;">
-            📅  Data last updated: June 2021 · Source: WFP Food Price Database
+            {T("data_updated", lang)}
         </span>
     </div>
     """, unsafe_allow_html=True)
@@ -299,27 +402,14 @@ def page_home(data):
     left, right = st.columns([1.2, 1])
 
     with left:
-        st.markdown("### What this platform does")
-        st.markdown("""
-        <div class="insight">
-            <b>AI PersonaMatch</b> answers the core business question for Syria's
-            reconstruction market: <b>Who buys what, where, and when?</b>
-        </div>
-        <div class="insight">
-            It transforms WFP humanitarian monitoring data into commercial consumer
-            intelligence — the only structured, data-driven FMCG analytics tool
-            built specifically for the Syrian market.
-        </div>
+        st.markdown(f"### {T('what_title', lang)}")
+        st.markdown(f"""
+        <div class="insight">{T("what_1", lang)}</div>
+        <div class="insight">{T("what_2", lang)}</div>
         """, unsafe_allow_html=True)
 
-        st.markdown("### Five analytical modules")
-        modules = [
-            ("A", "Consumer Segmentation",  "K-Means ML → 3 distinct consumer profiles"),
-            ("B", "Geographic Demand Maps", "Interactive Syria choropleth maps"),
-            ("C", "Price Sensitivity",      "WTP thresholds & income share analysis"),
-            ("D", "Demand Forecasting",     "Prophet AI → 12-month projections"),
-            ("E", "Market Entry Scoring",   "Composite ranking of all 14 governorates"),
-        ]
+        st.markdown(f"### {T('modules_title', lang)}")
+        modules = T("modules_list", lang)
         for letter, name, desc in modules:
             st.markdown(f"""
             <div style="display:flex; align-items:center; gap:12px; padding:8px 10px;
@@ -336,21 +426,8 @@ def page_home(data):
             """, unsafe_allow_html=True)
 
     with right:
-        st.markdown("### Key findings")
-        findings = [
-            ("🏆", "Tartous ranks #1 (84.9/100)",
-             "Highest purchasing power and price stability in Syria"),
-            ("📍", "3 distinct consumer segments",
-             "Coastal viable, stressed interior, fragmented urban"),
-            ("💸", "67.4% of region-months are food insecure",
-             "Households cannot afford the basic food basket"),
-            ("🍞", "Idleb crisis detected",
-             "Actual bread price is 4× above what households can afford"),
-            ("📈", "Basket cost projected to 1.2M SYP",
-             "By March 2022 — Prophet AI detected structural price break"),
-            ("🌙", "Ramadan seasonal signal found",
-             "Prophet detected shifting annual demand peaks from price data"),
-        ]
+        st.markdown(f"### {T('findings_title', lang)}")
+        findings = T("findings", lang)
         for icon, title, desc in findings:
             st.markdown(f"""
             <div class="finding">
@@ -360,7 +437,7 @@ def page_home(data):
             """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### Market entry quick view")
+    st.markdown(f"### {T('quickview', lang)}")
     if not data["scores"].empty:
         sc = clean_col(data["scores"].sort_values("rank"))
         fig = go.Figure(go.Bar(
@@ -1121,6 +1198,8 @@ def page_methodology(data):
 def main():
     if "logged_in" not in st.session_state:
         st.session_state["logged_in"] = False
+    if "lang" not in st.session_state:
+        st.session_state["lang"] = "en"
 
     if not st.session_state["logged_in"]:
         login_page()
@@ -1154,7 +1233,11 @@ def main():
 
     page_list   = COMPANY_PAGES if role == "Company" else ALL_PAGES
     page_keys   = [p[0] for p in page_list]
-    page_labels = [p[1] for p in page_list]
+    lang        = st.session_state.get("lang", "en")
+    # Use translated navigation labels
+    all_labels_translated   = TRANS.get(lang, TRANS["en"])["nav"]
+    comp_labels_translated  = TRANS.get(lang, TRANS["en"])["nav_company"]
+    page_labels = comp_labels_translated if role == "Company" else all_labels_translated
 
     if "page" not in st.session_state:
         st.session_state["page"] = "Home"
@@ -1183,6 +1266,7 @@ def main():
         )
 
     with user_col:
+        lang       = st.session_state.get("lang", "en")
         role       = st.session_state.get("user_role", "")
         user_name  = st.session_state.get("user_name", "")
         role_color = {
@@ -1190,8 +1274,16 @@ def main():
             "Company": "#2E7D32",
             "Analyst": "#1F4E79",
         }.get(role, "#888888")
+
+        # Language toggle
+        btn_label = "🌐 العربية" if lang == "en" else "🌐 English"
+        if st.button(btn_label, key="lang_toggle",
+                     use_container_width=True):
+            st.session_state["lang"] = "ar" if lang == "en" else "en"
+            st.rerun()
+
         st.markdown(
-            f'''<div style="text-align:right; padding-top:6px;">
+            f'''<div style="text-align:right; padding-top:4px;">
             <div style="font-size:0.72rem; color:#666;">{user_name}</div>
             <span style="background:{role_color}; color:white;
                  font-size:0.68rem; padding:2px 10px;
