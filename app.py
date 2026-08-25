@@ -994,6 +994,130 @@ def page_decision_support(data):
 # ─────────────────────────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────────────────────────
+
+# ── Methodology ───────────────────────────────────────────────────
+def page_methodology(data):
+    st.markdown("## 📖  Methodology")
+    st.markdown("*Full documentation of data sources, analytical methods, and platform architecture*")
+
+    st.markdown("### Data source")
+    st.markdown("""
+    <div class="insight">
+        <b>Primary dataset:</b> WFP (World Food Programme) Food Price Monitoring Database
+        for Syria, accessed via the Humanitarian Data Exchange (HDX) platform.<br><br>
+        WFP field monitors record retail prices of essential commodities in local markets
+        across Syria every month. This is the most comprehensive, structured, and
+        geographically complete source of consumer price data available for Syria.
+    </div>
+    """, unsafe_allow_html=True)
+
+    c1, c2, c3, c4 = st.columns(4)
+    for col, (num, lbl) in zip([c1,c2,c3,c4], [
+        ("116,588",              "Total observations"),
+        ("Apr 2011 — Jun 2021",  "Temporal coverage"),
+        ("14 gov. · 96 markets", "Geographic coverage"),
+        ("80 commodities",       "Products tracked"),
+    ]):
+        with col:
+            st.markdown(f"""
+            <div style="background:#1F4E79; color:white; border-radius:10px;
+                 padding:14px; text-align:center; margin-bottom:8px;">
+                <div style="font-size:1rem; font-weight:700; color:#DEEAF1;">{num}</div>
+                <div style="font-size:0.72rem; color:#BDD7EE; margin-top:4px;">{lbl}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("### Five analytical modules")
+    modules = [
+        ("A", "Consumer Segmentation",
+         "K-Means clustering (unsupervised machine learning)",
+         "Groups Syria's 14 governorates into natural consumer segments based on "
+         "price volatility, affordability index, and basket cost. Optimal K=3 determined "
+         "using the Elbow method (inertia) and Silhouette coefficient (peak score 0.475).",
+         "3 named consumer segment profiles with geographic distribution"),
+        ("B", "Geographic Demand Mapping",
+         "Plotly Mapbox choropleth + GeoPandas + GeoJSON",
+         "Joins analytical features to Syria's administrative boundary shapefile "
+         "(geoBoundaries ADM1). Three maps: consumer segments, affordability gradient, "
+         "and price volatility risk index.",
+         "3 interactive Syria maps — hover for governorate detail"),
+        ("C", "Price Sensitivity Analysis",
+         "OLS regression + income share computation",
+         "Computes income share (% of household income per commodity) and "
+         "willingness-to-pay ceilings using WFP Minimum Food Expenditure Basket quantities "
+         "and average household size of 4.3 persons. OLS models the relationship between "
+         "monthly price changes and affordability index changes.",
+         "WTP thresholds per product per region + bread affordability gap chart"),
+        ("D", "Temporal Forecasting",
+         "Facebook Prophet time series model",
+         "Prophet trained on 122 months of historical basket cost and affordability data. "
+         "Configured with multiplicative seasonality to handle exponential price growth. "
+         "Structural changepoints detected automatically. Seasonal Ramadan signal detected "
+         "from price data without explicit calendar input.",
+         "12-month forward projections with 80% confidence intervals"),
+        ("E", "Market Entry Scoring",
+         "Weighted composite scoring matrix",
+         "Five dimensions normalized 0–100 using min-max normalization. "
+         "Weights: Purchasing Power 30%, Price Stability 25%, Price Accessibility 25%, "
+         "Market Density 10%, Segment Quality 10%. All 14 governorates ranked.",
+         "Full governorate ranking with dimension-level score breakdown"),
+    ]
+
+    for letter, name, method, desc, output in modules:
+        with st.expander(f"Module {letter} — {name}", expanded=False):
+            c1, c2 = st.columns([1, 2])
+            with c1:
+                st.markdown(f"**Method:** {method}")
+                st.markdown(f"**Output:** {output}")
+            with c2:
+                st.markdown(f"**Description:** {desc}")
+
+    st.markdown("### Limitations and notes")
+    st.markdown("""
+    <div class="warning">
+        <b>Data cutoff:</b> The WFP dataset covers April 2011 through June 2021.
+        The 2011–2021 window captures the full arc of Syria's economic crisis —
+        from the pre-conflict baseline through the 2020–2021 hyperinflationary collapse.
+    </div>
+    <div class="warning">
+        <b>Basket cost note:</b> The quantity-weighted basket cost may slightly overestimate
+        true household expenditure due to simultaneous inclusion of both wheat flour and bread.
+        This represents a conservative upper-bound estimate consistent with food security
+        worst-case scenarios.
+    </div>
+    <div class="insight">
+        <b>Geographic granularity:</b> All analysis is at governorate level (ADM1).
+        Sub-governorate variation within each region is not captured in this version.
+        City-level analysis is planned for v2.
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Technology stack")
+    tech = [
+        ("Python 3.12",      "Core programming language"),
+        ("Pandas + NumPy",   "Data processing and feature engineering"),
+        ("Scikit-learn",     "K-Means clustering and StandardScaler normalization"),
+        ("Statsmodels",      "OLS regression analysis"),
+        ("Prophet",          "Time series forecasting"),
+        ("Plotly",           "Interactive charts and maps"),
+        ("GeoPandas",        "Geospatial data processing"),
+        ("Streamlit",        "Web application framework"),
+        ("WFP / HDX",        "Primary data source (humanitarian food prices)"),
+        ("geoBoundaries",    "Syria administrative boundary shapefile"),
+    ]
+    c1, c2 = st.columns(2)
+    for i, (tool, desc) in enumerate(tech):
+        with (c1 if i % 2 == 0 else c2):
+            st.markdown(f"""
+            <div style="display:flex; gap:10px; align-items:center; padding:7px 10px;
+                 background:#F8F9FA; border-radius:6px; margin:3px 0;">
+                <div style="font-weight:600; color:#1F4E79;
+                     min-width:130px; font-size:0.85rem;">{tool}</div>
+                <div style="color:#546E7A; font-size:0.82rem;">{desc}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+
 def main():
     if "logged_in" not in st.session_state:
         st.session_state["logged_in"] = False
@@ -1017,6 +1141,7 @@ def main():
         ("Forecasting",       "📈 Forecast"),
         ("Market Entry",      "🏆 Ranking"),
         ("Decision Support",  "🎯 Advisory"),
+        ("Methodology",       "📖 Method"),
     ]
 
     COMPANY_PAGES = [
@@ -1090,6 +1215,7 @@ def main():
     elif page == "Forecasting":       page_forecasting(data)
     elif page == "Market Entry":      page_market_entry(data)
     elif page == "Decision Support":  page_decision_support(data)
+    elif page == "Methodology":       page_methodology(data)
 
 if __name__ == "__main__":
     main()
