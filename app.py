@@ -83,10 +83,17 @@ div[data-testid="collapsedControl"] { display: none !important; }
 if st.session_state.get("lang", "en") == "ar":
     st.markdown("""
         <style>
-        body, .stMarkdown, .stText, p, h1, h2, h3, div {
+        body, .stMarkdown, p, h1, h2, h3 {
             direction: rtl !important;
             text-align: right !important;
-            font-family: 'Noto Sans Arabic', 'Arial', sans-serif !important;
+            font-family: 'Noto Sans Arabic', Arial, sans-serif !important;
+        }
+        [data-testid="stDataFrame"],
+        [data-testid="stDataFrame"] *,
+        .stPlotlyChart, .stSelectbox, .stTextInput,
+        .stMetric, .stExpander, table, th, td {
+            direction: ltr !important;
+            text-align: left !important;
         }
         .stRadio > div { flex-direction: row-reverse !important; }
         </style>
@@ -571,18 +578,18 @@ def page_consumer_profiles(data):
     seg_info = {
         "Viable coastal & admin markets": {
             "icon": "🟢", "color": "#2E7D32",
-            "desc": "The most commercially attractive segment. Households consistently earn above the food basket cost threshold. Coastal access provides supply chain advantages.",
-            "strategy": "Immediate market entry. Full product range. Standard market pricing.",
+            "desc": TP("seg_viable_desc", lang),
+            "strategy": TP("seg_viable_strat", lang),
         },
         "Stressed interior markets": {
             "icon": "🟠", "color": "#E65100",
-            "desc": "The largest segment — 9 governorates covering most of Syria's geographic area. Households generally below the affordability threshold. Viable with adjusted pricing.",
-            "strategy": "Entry viable with competitive pricing. Focus on high-volume staples.",
+            "desc": TP("seg_stressed_desc", lang),
+            "strategy": TP("seg_stressed_strat", lang),
         },
         "Fragmented major urban centers": {
             "icon": "🔴", "color": "#C62828",
-            "desc": "High price volatility from dual official/parallel market systems. Large populations but complex, unpredictable operating environment.",
-            "strategy": "Secondary entry after coastal establishment. Requires dual-market strategy.",
+            "desc": TP("seg_frag_desc", lang),
+            "strategy": TP("seg_frag_strat", lang),
         },
     }
 
@@ -595,9 +602,9 @@ def page_consumer_profiles(data):
         ):
             c1, c2 = st.columns([2, 1])
             with c1:
-                st.markdown(f"**About this segment:** {info['desc']}")
-                st.markdown(f"**Recommended strategy:** {info['strategy']}")
-                st.markdown(f"**Governorates:** {govs}")
+                st.markdown(f"**{TP('profiles_about',lang)}:** {info['desc']}")
+                st.markdown(f"**{TP('profiles_strat',lang)}:** {info['strategy']}")
+                st.markdown(f"**{TP('profiles_govs',lang)}:** {govs}")
             with c2:
                 if not subset.empty:
                     avg_a = subset["avg_affordability"].mean()
@@ -1077,22 +1084,21 @@ def page_decision_support(data):
     st.markdown(TP("advisory_input",lang))
     c1, c2, c3 = st.columns(3)
     with c1:
-        product = st.selectbox("Product category", [
-            "Staple Foods (flour, rice, sugar, oil)",
-            "Fresh & Protein (eggs, dairy, chicken)",
-            "Household Goods (soap, cleaning products)",
-            "Personal Care (toothpaste, hygiene)",
-        ])
+        prod_opts = [TP("prod_1",lang), TP("prod_2",lang),
+                     TP("prod_3",lang), TP("prod_4",lang)]
+        product = st.selectbox(TP("advisory_prod",lang), prod_opts)
     with c2:
-        risk = st.select_slider("Risk tolerance",
-            options=["Very Low","Low","Medium","High","Very High"], value="Medium")
+        risk_opts = TP("risk_opts", lang)
+        risk_default = risk_opts[2]  # Medium / متوسط
+        risk = st.select_slider(TP("advisory_risk",lang),
+            options=risk_opts, value=risk_default)
+        # Map back to English for scoring logic
+        risk_en_map = dict(zip(risk_opts,
+            ["Very Low","Low","Medium","High","Very High"]))
+        risk_en = risk_en_map.get(risk, "Medium")
     with c3:
-        horizon = st.selectbox("Entry timeline", [
-            "Immediate (0–3 months)",
-            "Short-term (3–6 months)",
-            "Medium-term (6–12 months)",
-            "Long-term (12+ months)",
-        ])
+        horiz_opts = TP("horiz_opts", lang)
+        horizon = st.selectbox(TP("advisory_horiz",lang), horiz_opts)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1102,20 +1108,20 @@ def page_decision_support(data):
             return
 
         sc  = clean_col(data["scores"].sort_values("rank"))
-        min_score = {"Very Low":75,"Low":65,"Medium":55,"High":45,"Very High":30}[risk]
+        risk_for_score = risk_en if "risk_en" in dir() else risk
+        min_score = {"Very Low":75,"Low":65,"Medium":55,"High":45,"Very High":30}.get(risk_for_score, 55)
         rec = sc[sc["composite_score"] >= min_score]
 
         st.markdown("---")
         st.markdown(f"""
         <div style="background:#1F4E79; color:white; padding:16px 20px;
              border-radius:10px; margin-bottom:16px;">
-            <div style="font-size:0.82rem; color:#BDD7EE;">AI PersonaMatch Advisory Report</div>
+            <div style="font-size:0.82rem; color:#BDD7EE;">{TP("gen_report",lang)}</div>
             <div style="font-size:1.15rem; font-weight:600; margin-top:4px;">
                 {product.split("(")[0].strip()} — Syria Market Entry Strategy
             </div>
             <div style="font-size:0.82rem; color:#BDD7EE; margin-top:8px;">
-                Risk: {risk} · Timeline: {horizon} ·
-                Qualifying markets (≥{min_score} pts): {len(rec)} governorates
+                {risk} · {horizon} · {TP("qualifying",lang)} (≥{min_score}): {len(rec)}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1124,7 +1130,7 @@ def page_decision_support(data):
             top = rec.iloc[0]
             st.markdown(f"""
             <div class="finding">
-                <b>🏆  Primary recommendation: {top["adm1_name"]}</b><br>
+                <b>{TP("primary_rec",lang)}: {top["adm1_name"]}</b><br>
                 Composite score {top["composite_score"]:.1f}/100 — {top["segment_name"]}.<br>
                 Purchasing Power {top["score_purchasing"]:.0f}/100 ·
                 Price Stability {top["score_stability"]:.0f}/100 ·
@@ -1136,7 +1142,7 @@ def page_decision_support(data):
                 others = ", ".join(rec.iloc[1:4]["adm1_name"].tolist())
                 st.markdown(f"""
                 <div class="insight">
-                    <b>Secondary markets for phased expansion:</b> {others}
+                    <b>{TP("secondary_rec",lang)}:</b> {others}
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -1151,12 +1157,9 @@ def page_decision_support(data):
                 st.markdown(f"<div class='insight'><b>📦  Category insight:</b> {text}</div>",
                             unsafe_allow_html=True)
 
-        if risk in ["Very Low","Low"]:
-            st.markdown("""
-            <div class="warning">
-                <b>⚠️  Low-risk profile:</b> Only coastal viable markets qualify under your
-                risk tolerance. Start with Tartous (#1, 84.9/100) before expanding inland.
-            </div>
+        if risk_for_score in ["Very Low","Low"]:
+            st.markdown(f"""
+            <div class="warning">{TP("low_risk_note",lang)}</div>
             """, unsafe_allow_html=True)
 
         st.markdown(TP("advisory_all",lang))
