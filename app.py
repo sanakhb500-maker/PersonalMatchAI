@@ -21,6 +21,8 @@ st.markdown("""
 [data-testid="stSidebar"] { background-color: #1a2744; }
 [data-testid="stSidebarContent"] { color: white; }
 #MainMenu, footer, header { visibility: hidden; }
+section[data-testid="stSidebar"] { display: none !important; }
+div[data-testid="collapsedControl"] { display: none !important; }
 
 /* Hide the collapse button — sidebar always stays open */
 [data-testid="stSidebarHeader"] button { display: none !important; }
@@ -1373,16 +1375,25 @@ def main():
 
         # Language toggle
         btn_label = "🌐 العربية" if lang == "en" else "🌐 English"
-        if st.button(btn_label, key="lang_toggle",
-                     use_container_width=True):
-            st.session_state["lang"] = "ar" if lang == "en" else "en"
-            st.rerun()
+        col_lang, col_out = st.columns(2)
+        with col_lang:
+            if st.button(btn_label, key="lang_toggle",
+                         use_container_width=True):
+                st.session_state["lang"] = "ar" if lang == "en" else "en"
+                st.rerun()
+        with col_out:
+            signout_label = "🚪 خروج" if lang == "ar" else "🚪 Sign Out"
+            if st.button(signout_label, key="signout_top",
+                         use_container_width=True):
+                for k in ["logged_in","username","user_name","user_role","page"]:
+                    st.session_state.pop(k, None)
+                st.rerun()
 
         st.markdown(
-            f'''<div style="text-align:right; padding-top:4px;">
-            <div style="font-size:0.72rem; color:#666;">{user_name}</div>
+            f'''<div style="text-align:right; padding-top:2px;">
+            <div style="font-size:0.70rem; color:#666;">{user_name}</div>
             <span style="background:{role_color}; color:white;
-                 font-size:0.68rem; padding:2px 10px;
+                 font-size:0.66rem; padding:2px 8px;
                  border-radius:999px; font-weight:500;">
                 {role}
             </span></div>''',
