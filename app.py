@@ -1082,23 +1082,60 @@ def page_decision_support(data):
     """, unsafe_allow_html=True)
 
     st.markdown(TP("advisory_input",lang))
+    # Bilingual product/risk/horizon options
+    if lang == "ar":
+        prod_opts  = [
+            "المواد الغذائية الأساسية (دقيق، أرز، سكر، زيت)",
+            "البروتين والطازج (بيض، ألبان، دجاج)",
+            "المواد المنزلية (صابون، منظفات)",
+            "العناية الشخصية (معجون أسنان، النظافة)",
+        ]
+        risk_opts   = ["منخفض جداً","منخفض","متوسط","مرتفع","مرتفع جداً"]
+        horiz_opts  = [
+            "فوري (0–3 أشهر)",
+            "قصير المدى (3–6 أشهر)",
+            "متوسط المدى (6–12 شهراً)",
+            "طويل المدى (أكثر من 12 شهراً)",
+        ]
+        prod_lbl  = "فئة المنتج"
+        risk_lbl  = "مستوى تحمّل المخاطر"
+        horiz_lbl = "الجدول الزمني للدخول"
+    else:
+        prod_opts  = [
+            "Staple Foods (flour, rice, sugar, oil)",
+            "Fresh & Protein (eggs, dairy, chicken)",
+            "Household Goods (soap, cleaning products)",
+            "Personal Care (toothpaste, hygiene)",
+        ]
+        risk_opts   = ["Very Low","Low","Medium","High","Very High"]
+        horiz_opts  = [
+            "Immediate (0–3 months)",
+            "Short-term (3–6 months)",
+            "Medium-term (6–12 months)",
+            "Long-term (12+ months)",
+        ]
+        prod_lbl  = "Product category"
+        risk_lbl  = "Risk tolerance"
+        horiz_lbl = "Entry timeline"
+
+    # English risk options for scoring logic
+    risk_en_options = ["Very Low","Low","Medium","High","Very High"]
+
     c1, c2, c3 = st.columns(3)
     with c1:
-        prod_opts = [TP("prod_1",lang), TP("prod_2",lang),
-                     TP("prod_3",lang), TP("prod_4",lang)]
-        product = st.selectbox(TP("advisory_prod",lang), prod_opts)
+        product = st.selectbox(prod_lbl, prod_opts,
+                               key=f"prod_{lang}")
     with c2:
-        risk_opts = TP("risk_opts", lang)
-        risk_default = risk_opts[2]  # Medium / متوسط
-        risk = st.select_slider(TP("advisory_risk",lang),
-            options=risk_opts, value=risk_default)
-        # Map back to English for scoring logic
-        risk_en_map = dict(zip(risk_opts,
-            ["Very Low","Low","Medium","High","Very High"]))
-        risk_en = risk_en_map.get(risk, "Medium")
+        # Use language-specific key to avoid stale session state mismatch
+        risk = st.select_slider(risk_lbl,
+                                options=risk_opts,
+                                value=risk_opts[2],
+                                key=f"risk_{lang}")
+        risk_idx = risk_opts.index(risk)
+        risk_en  = risk_en_options[risk_idx]
     with c3:
-        horiz_opts = TP("horiz_opts", lang)
-        horizon = st.selectbox(TP("advisory_horiz",lang), horiz_opts)
+        horizon = st.selectbox(horiz_lbl, horiz_opts,
+                               key=f"horiz_{lang}")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1108,8 +1145,8 @@ def page_decision_support(data):
             return
 
         sc  = clean_col(data["scores"].sort_values("rank"))
-        risk_for_score = risk_en if "risk_en" in dir() else risk
-        min_score = {"Very Low":75,"Low":65,"Medium":55,"High":45,"Very High":30}.get(risk_for_score, 55)
+        min_score = {"Very Low":75,"Low":65,"Medium":55,
+                      "High":45,"Very High":30}.get(risk_en, 55)
         rec = sc[sc["composite_score"] >= min_score]
 
         st.markdown("---")
@@ -1146,18 +1183,29 @@ def page_decision_support(data):
                 </div>
                 """, unsafe_allow_html=True)
 
-        cat_insights = {
-            "Staple": "Staple foods have the highest income share burden. Bread and flour consume 15–40% of household income across most regions. Prioritise volume over margin.",
-            "Fresh" : "Fresh products require cold chain infrastructure. Coastal regions offer the best logistics. Eggs and dairy show the most stable demand.",
-            "Household": "Monitoring data is limited post-2021. Strong demand signal in coastal viable markets. Lower income share burden than food — households can absorb moderate pricing.",
-            "Personal": "Monitoring began 2020. Diaspora returnees in coastal markets represent the highest purchasing power segment for personal care products.",
-        }
+        if lang == "ar":
+            cat_insights = {
+                "أساسية"    : "المواد الغذائية الأساسية تمثل أعلى عبء على الدخل. يستهلك الخبز والدقيق 15–40% من دخل الأسرة في معظم المناطق. رَكِّز على الحجم بدلاً من الهامش.",
+                "بروتين"    : "المنتجات الطازجة تتطلب بنية تحتية للتبريد. تتميز المناطق الساحلية بأفضل لوجستيات. البيض ومنتجات الألبان الأكثر استقراراً في الطلب.",
+                "منزلية"    : "بيانات الرصد محدودة ما بعد 2021. إشارة طلب قوية في الأسواق الساحلية. عبء حصة دخل أقل مقارنة بالغذاء.",
+                "شخصية"     : "الرصد بدأ عام 2020. المغتربون العائدون في الأسواق الساحلية يمثلون أعلى شريحة قوة شرائية.",
+            }
+            icon_insight = "📦  ملاحظة الفئة"
+        else:
+            cat_insights = {
+                "Staple"   : "Staple foods have the highest income share burden. Bread and flour consume 15–40% of household income. Prioritise volume over margin.",
+                "Fresh"    : "Fresh products require cold chain infrastructure. Coastal regions offer the best logistics. Eggs and dairy show the most stable demand.",
+                "Household": "Monitoring data is limited post-2021. Strong demand signal in coastal viable markets. Lower income share burden than food.",
+                "Personal" : "Monitoring began 2020. Diaspora returnees in coastal markets represent the highest purchasing power segment.",
+            }
+            icon_insight = "📦  Category insight"
+
         for key, text in cat_insights.items():
             if key.lower() in product.lower():
-                st.markdown(f"<div class='insight'><b>📦  Category insight:</b> {text}</div>",
+                st.markdown(f"<div class='insight'><b>{icon_insight}:</b> {text}</div>",
                             unsafe_allow_html=True)
 
-        if risk_for_score in ["Very Low","Low"]:
+        if risk_en in ["Very Low","Low"]:
             st.markdown(f"""
             <div class="warning">{TP("low_risk_note",lang)}</div>
             """, unsafe_allow_html=True)
