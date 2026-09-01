@@ -637,43 +637,233 @@ def page_consumer_profiles(data):
 
 # ── Geographic Maps ───────────────────────────────────────────────
 def page_geographic_maps(data):
+    import requests, json
     lang = st.session_state.get("lang","en")
     st.markdown(TP("maps_title",lang))
     st.markdown(TP("maps_sub",lang))
 
-    tab1, tab2, tab3 = st.tabs(TP("maps_tabs",lang))
+    # ── Load GeoJSON (cached) ─────────────────────────────────────
+    @st.cache_data(show_spinner=False)
+    def get_geojson():
+        try:
+            api  = "https://www.geoboundaries.org/api/current/gbOpen/SYR/ADM1/"
+            meta = requests.get(api, timeout=20).json()
+            geo  = requests.get(meta["gjDownloadURL"], timeout=60).json()
+            return geo
+        except Exception:
+            return None
 
-    def load_map(filename, tab, description):
-        with tab:
-            st.markdown(description, unsafe_allow_html=True)
-            path = f"data/maps/{filename}"
-            if os.path.exists(path):
-                with open(path, "r", encoding="utf-8") as f:
-                    st.components.v1.html(f.read(), height=560, scrolling=False)
-            else:
-                st.warning(f"Map file `{filename}` not found in `data/maps/`. "
-                           "Please copy your HTML map files to this folder.")
+    geo = get_geojson()
 
-    load_map("map_consumer_segments.html", tab1, """
-        <div class="insight">
-            🟢 <b>Green</b> = Viable coastal markets — Tartous, Lattakia, City Damascus<br>
-            🟠 <b>Orange</b> = Stressed interior markets — 9 governorates<br>
-            🔴 <b>Red/Dark</b> = Fragmented urban centers — Damascus, Aleppo
-        </div>
-    """)
-    load_map("map_affordability.html", tab2, """
-        <div class="insight">
-            Color gradient: deep red (severe food insecurity) → yellow (near threshold) → green (above 1.0).<br>
-            The 1.0 threshold means monthly income equals monthly basket cost.
-        </div>
-    """)
-    load_map("map_volatility.html", tab3, """
-        <div class="insight">
-            Darker red = more unstable prices = higher business operating risk.<br>
-            Damascus (95% CoV) and Aleppo (72% CoV) are the most volatile markets nationally.
-        </div>
-    """)
+    if geo is None:
+        st.error("Could not load Syria boundary data. Please check your internet connection.")
+        return
 
+    # Name mapping: GeoJSON → our dataset
+    NAME_GEO = {
+        "Damascus"      : "Damascus",
+        "Aleppo"        : "Aleppo",
+        "Rural Damascus": "City_Damascus",
+        "Homs"          : "Homs",
+        "Hama"          : "Hama",
+        "Lattakia"      : "Lattakia",
+        "Idleb"         : "Idleb",
+        "Al-Hasakeh"    : "Hassakeh",
+        "Deir-ez-Zor"   : "Dayr_Az_Zor",
+        "Tartous"       : "Tartous",
+        "Ar-Raqqa"      : "Raqqa",
+        "Dar'a"        : "Dara",
+        "As-Sweida"     : "As_Suweida",
+        "Quneitra"      : "Al_Qunaytirah",
+    }
+    for f in geo["features"]:
+        orig = f["properties"]["shapeName"]
+        f["properties"]["adm1_name"] = NAME_GEO.get(orig, orig)
+
+    segs = data["segments"].copy() if not data["segments"].empty else pd.DataFrame()
+    if segs.empty:
+        st.error("Segment data not loaded.")
+        return
+
+    # Segment color codes
+    seg_codes = {
+        "Viable coastal & admin markets" : 2,
+        "Stressed interior markets"      : 1,
+        "Fragmented major urban centers" : 0,
+    }
+    segs["seg_code"] = segs["segment_name"].map(seg_codes).fillna(1)
+
+    MAPBOX_STYLE  = "carto-positron"
+    CENTER        = {"lat": 35.0, "lon": 38.5}
+    ZOOM          = 5.2
+    HEIGHT        = 540
+
+    tab1, tab2, tab3 = st.tabs(TP("maps_tabs", lang))
+
+    # ── Tab 1: Consumer Segments ──────────────────────────────────
+    with tab1:
+        if lang == "ar":
+            st.markdown("""
+            <div class="insight">
+                🟢 <b>أخضر</b> = الأسواق الساحلية الجديدة — طرطوس، اللاذقية، ريف دمشق<br>
+                🟠 <b>برتقالي</b> = الأسواق الداخلية المتأزمة — 9 محافظات<br>
+                🔴 <b>أحمر</b> = المراكز الحضرية الكبرى المجزأة — دمشق، حلب
+            </div>""", unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="insight">
+                🟢 <b>Green</b> = Viable coastal markets — Tartous, Lattakia, City Damascus<br>
+                🟠 <b>Orange</b> = Stressed interior markets — 9 governorates<br>
+                🔴 <b>Red</b> = Fragmented urban centers — Damascus, Aleppo
+            </div>""", unsafe_allow_html=True)
+
+        fig1 = go.Figure(go.Choroplethmapbox(
+            geojson=geo,
+            locations=segs["adm1_name"],
+            z=segs["seg_code"],
+            featureidkey="properties.adm1_name",
+            colorscale=[
+                [0.00,"#C62828"],[0.33,"#C62828"],
+                [0.34,"#E65100"],[0.66,"#E65100"],
+                [0.67,"#2E7D32"],[1.00,"#2E7D32"],
+            ],
+            zmin=0, zmax=2,
+            marker_opacity=0.85,
+            marker_line_width=1,
+            marker_line_color="white",
+            showscale=False,
+            text=segs["adm1_name"],
+            customdata=segs[["segment_name","avg_affordability","volatility_index"]],
+            hovertemplate=(
+                "<b>%{text}</b><br>"
+                "Segment: %{customdata[0]}<br>"
+                "Affordability: %{customdata[1]:.3f}<br>"
+                "Volatility: %{customdata[2]:.1f}%"
+                "<extra></extra>"
+            ),
+        ))
+        fig1.update_layout(
+            mapbox_style=MAPBOX_STYLE,
+            mapbox_zoom=ZOOM,
+            mapbox_center=CENTER,
+            height=HEIGHT,
+            margin=dict(l=0,r=0,t=20,b=0),
+        )
+        st.plotly_chart(fig1, use_container_width=True)
+
+    # ── Tab 2: Affordability Heatmap ──────────────────────────────
+    with tab2:
+        if lang == "ar":
+            st.markdown("""
+            <div class="insight">
+                التدرج اللوني: أحمر داكن (انعدام أمن غذائي حاد) ← أصفر (قرب العتبة) ← أخضر (فوق 1.0)
+            </div>""", unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="insight">
+                Color scale: deep red (severe food insecurity) → yellow (near threshold) → green (above 1.0).<br>
+                Values above 1.0 mean households can afford the basic food basket.
+            </div>""", unsafe_allow_html=True)
+
+        max_a = 1.4
+        fig2 = go.Figure(go.Choroplethmapbox(
+            geojson=geo,
+            locations=segs["adm1_name"],
+            z=segs["avg_affordability"],
+            featureidkey="properties.adm1_name",
+            colorscale=[
+                [0.00,            "#C62828"],
+                [0.35/max_a,      "#EF5350"],
+                [0.60/max_a,      "#FFA726"],
+                [0.85/max_a,      "#FFEE58"],
+                [1.00/max_a,      "#A5D6A7"],
+                [1.00,            "#2E7D32"],
+            ],
+            zmin=0, zmax=max_a,
+            colorbar=dict(
+                title="Affordability<br>Index",
+                tickvals=[0,0.5,1.0,1.4],
+                ticktext=["0.0","0.5","1.0 ← threshold","1.4"],
+                len=0.6,
+            ),
+            marker_opacity=0.85,
+            marker_line_width=1,
+            marker_line_color="white",
+            text=segs["adm1_name"],
+            customdata=segs[["avg_affordability","volatility_index","segment_name"]],
+            hovertemplate=(
+                "<b>%{text}</b><br>"
+                "Affordability: %{customdata[0]:.3f}<br>"
+                "Volatility: %{customdata[1]:.1f}%<br>"
+                "Segment: %{customdata[2]}"
+                "<extra></extra>"
+            ),
+        ))
+        fig2.update_layout(
+            mapbox_style=MAPBOX_STYLE,
+            mapbox_zoom=ZOOM,
+            mapbox_center=CENTER,
+            height=HEIGHT,
+            margin=dict(l=0,r=0,t=20,b=0),
+        )
+        st.plotly_chart(fig2, use_container_width=True)
+
+    # ── Tab 3: Price Volatility Risk ──────────────────────────────
+    with tab3:
+        if lang == "ar":
+            st.markdown("""
+            <div class="insight">
+                أحمر داكن = أسعار غير مستقرة = مخاطر تشغيلية أعلى للشركات.<br>
+                دمشق (95% CoV) وحلب (72% CoV) أكثر الأسواق تذبذباً.
+            </div>""", unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="insight">
+                Darker red = more unstable prices = higher business operating risk.<br>
+                Damascus (95% CoV) and Aleppo (72% CoV) are the most volatile markets.
+            </div>""", unsafe_allow_html=True)
+
+        if not data["volatility"].empty:
+            vol_data = data["volatility"].copy()
+            vol_data.columns = ["adm1_name","regional_volatility_index"]
+            map_vol = segs[["adm1_name"]].merge(vol_data, on="adm1_name", how="left")
+        else:
+            map_vol = segs[["adm1_name","volatility_index"]].copy()
+            map_vol.columns = ["adm1_name","regional_volatility_index"]
+
+        fig3 = go.Figure(go.Choroplethmapbox(
+            geojson=geo,
+            locations=map_vol["adm1_name"],
+            z=map_vol["regional_volatility_index"],
+            featureidkey="properties.adm1_name",
+            colorscale="Reds",
+            zmin=40, zmax=100,
+            colorbar=dict(
+                title="Volatility<br>Index (%)",
+                tickvals=[40,60,80,100],
+                len=0.6,
+            ),
+            marker_opacity=0.85,
+            marker_line_width=1,
+            marker_line_color="white",
+            text=map_vol["adm1_name"],
+            customdata=map_vol[["regional_volatility_index"]],
+            hovertemplate=(
+                "<b>%{text}</b><br>"
+                "Volatility Index: %{customdata[0]:.1f}%"
+                "<extra></extra>"
+            ),
+        ))
+        fig3.update_layout(
+            mapbox_style=MAPBOX_STYLE,
+            mapbox_zoom=ZOOM,
+            mapbox_center=CENTER,
+            height=HEIGHT,
+            margin=dict(l=0,r=0,t=20,b=0),
+        )
+        st.plotly_chart(fig3, use_container_width=True)
+
+    # ── Summary table ─────────────────────────────────────────────
     st.markdown("---")
     st.markdown(TP("maps_summary",lang))
     if not data["segments"].empty:
@@ -683,11 +873,15 @@ def page_geographic_maps(data):
         ]].copy()
         disp.columns = ["Governorate","Segment","Avg Affordability",
                         "Volatility (%)","Avg Basket Cost (SYP)"]
-        disp["Avg Affordability"]      = disp["Avg Affordability"].round(3)
-        disp["Volatility (%)"]         = disp["Volatility (%)"].round(1)
-        disp["Avg Basket Cost (SYP)"]  = disp["Avg Basket Cost (SYP)"].apply(lambda x: f"{x:,.0f}")
-        st.dataframe(disp.sort_values("Avg Affordability", ascending=False),
-                     use_container_width=True, hide_index=True)
+        disp["Avg Affordability"]     = disp["Avg Affordability"].round(3)
+        disp["Volatility (%)"]        = disp["Volatility (%)"].round(1)
+        disp["Avg Basket Cost (SYP)"] = disp["Avg Basket Cost (SYP)"].apply(
+            lambda x: f"{x:,.0f}"
+        )
+        st.dataframe(
+            disp.sort_values("Avg Affordability", ascending=False),
+            use_container_width=True, hide_index=True
+        )
 
 # ── Price Intelligence ────────────────────────────────────────────
 def page_price_intelligence(data):
