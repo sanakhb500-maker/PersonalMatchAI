@@ -250,8 +250,8 @@ def sidebar():
 TRANS = {
     "en": {
         "nav": ["🏠 Home","👤 Profiles","🗺️ Maps","💰 Prices",
-                "📈 Forecast","🏆 Ranking","🎯 Advisory","📖 Method"],
-        "nav_company": ["🏠 Home","🗺️ Maps","💰 Prices","🏆 Ranking","🎯 Advisory"],
+                "📈 Forecast","🏆 Ranking","🎯 Advisory","📤 Upload","📖 Method"],
+        "nav_company": ["🏠 Home","🗺️ Maps","💰 Prices","🏆 Ranking","🎯 Advisory","📤 Upload"],
         "sign_out"      : "🚪  Sign Out",
         "signed_in_as"  : "Signed in as",
         "data_updated"  : "📅  Data last updated: June 2021 · Source: WFP",
@@ -291,8 +291,8 @@ TRANS = {
     },
     "ar": {
         "nav": ["🏠 الرئيسية","👤 الملفات","🗺️ الخرائط","💰 الأسعار",
-                "📈 التنبؤ","🏆 التصنيف","🎯 الاستشارة","📖 المنهجية"],
-        "nav_company": ["🏠 الرئيسية","🗺️ الخرائط","💰 الأسعار","🏆 التصنيف","🎯 الاستشارة"],
+                "📈 التنبؤ","🏆 التصنيف","🎯 الاستشارة","📤 رفع","📖 المنهجية"],
+        "nav_company": ["🏠 الرئيسية","🗺️ الخرائط","💰 الأسعار","🏆 التصنيف","🎯 الاستشارة","📤 رفع"],
         "sign_out"      : "🚪  تسجيل الخروج",
         "signed_in_as"  : "مسجّل الدخول بوصفك",
         "data_updated"  : "📅  آخر تحديث: يونيو 2021 · المصدر: برنامج الغذاء العالمي",
@@ -1344,6 +1344,313 @@ def page_methodology(data):
             """, unsafe_allow_html=True)
 
 
+
+# ── Company Data Upload ───────────────────────────────────────────
+def page_upload(data):
+    lang = st.session_state.get("lang", "en")
+
+    if lang == "ar":
+        st.markdown("## 📤  تحليل بيانات الشركة")
+        st.markdown("*ارفع ملف CSV ببيانات مبيعاتك — ستحلّله المنصة وتقارنه بالمعايير الوطنية السورية*")
+    else:
+        st.markdown("## 📤  Company Data Analysis")
+        st.markdown("*Upload your sales CSV — the platform analyses it and benchmarks it against Syria national data*")
+
+    # ── Template download ─────────────────────────────────────────
+    template_csv = """date,governorate,product_name,category,quantity_sold,unit_price_syp,total_revenue_syp
+2024-01-15,Tartous,Wheat Flour,Staple Foods,120,4500,540000
+2024-01-15,Lattakia,Cooking Oil,Staple Foods,80,12000,960000
+2024-01-20,Homs,Sugar,Staple Foods,200,3800,760000
+2024-02-01,Damascus,Rice,Staple Foods,150,6500,975000
+2024-02-10,Aleppo,Soap,Household Goods,90,2500,225000
+"""
+
+    if lang == "ar":
+        st.markdown("### الخطوة 1 — تحميل القالب")
+        st.markdown("""
+        <div class="insight">
+            يجب أن يحتوي ملفك على هذه الأعمدة: date, governorate, product_name,
+            category, quantity_sold, unit_price_syp, total_revenue_syp
+        </div>
+        """, unsafe_allow_html=True)
+        dl_label = "⬇️  تحميل قالب CSV"
+    else:
+        st.markdown("### Step 1 — Download the template")
+        st.markdown("""
+        <div class="insight">
+            Your file must contain these columns: <b>date, governorate, product_name,
+            category, quantity_sold, unit_price_syp, total_revenue_syp</b>
+        </div>
+        """, unsafe_allow_html=True)
+        dl_label = "⬇️  Download CSV template"
+
+    st.download_button(
+        label=dl_label,
+        data=template_csv,
+        file_name="personamatch_template.csv",
+        mime="text/csv",
+    )
+
+    st.markdown("---")
+
+    # ── File upload ───────────────────────────────────────────────
+    upload_label = "### الخطوة 2 — رفع بياناتك" if lang == "ar" else "### Step 2 — Upload your data"
+    st.markdown(upload_label)
+
+    uploader_text = "اختر ملف CSV" if lang == "ar" else "Choose a CSV file"
+    uploaded_file = st.file_uploader(uploader_text, type=["csv"])
+
+    if uploaded_file is None:
+        if lang == "ar":
+            st.info("لم يتم رفع أي ملف بعد. قم بتحميل القالب أعلاه، ثم أضف بياناتك وارفعه هنا.")
+        else:
+            st.info("No file uploaded yet. Download the template above, fill in your data, then upload it here.")
+        return
+
+    # ── Load and validate ─────────────────────────────────────────
+    try:
+        df_company = pd.read_csv(uploaded_file)
+        df_company.columns = df_company.columns.str.strip().str.lower()
+    except Exception as e:
+        st.error(f"Could not read file: {e}")
+        return
+
+    required_cols = ["date","governorate","product_name","category",
+                     "quantity_sold","unit_price_syp","total_revenue_syp"]
+    missing = [c for c in required_cols if c not in df_company.columns]
+
+    if missing:
+        if lang == "ar":
+            st.error(f"الأعمدة المفقودة: {', '.join(missing)}")
+        else:
+            st.error(f"Missing columns: {', '.join(missing)}")
+        st.markdown("**Your columns:** " + ", ".join(df_company.columns.tolist()))
+        return
+
+    # Parse dates
+    df_company["date"] = pd.to_datetime(df_company["date"], errors="coerce")
+    df_company["total_revenue_syp"] = pd.to_numeric(
+        df_company["total_revenue_syp"], errors="coerce"
+    ).fillna(0)
+    df_company["quantity_sold"] = pd.to_numeric(
+        df_company["quantity_sold"], errors="coerce"
+    ).fillna(0)
+
+    # ── Summary stats ─────────────────────────────────────────────
+    if lang == "ar":
+        st.markdown("### ✅  تم قبول الملف بنجاح")
+    else:
+        st.markdown("### ✅  File accepted successfully")
+
+    c1, c2, c3, c4 = st.columns(4)
+    stats = [
+        (f"{len(df_company):,}",
+         "سجلات مبيعات" if lang=="ar" else "Sales records"),
+        (f"{df_company['governorate'].nunique()}",
+         "محافظات" if lang=="ar" else "Governorates"),
+        (f"{df_company['product_name'].nunique()}",
+         "منتجات" if lang=="ar" else "Products"),
+        (f"{df_company['total_revenue_syp'].sum()/1e6:.1f}M",
+         "إجمالي الإيرادات (ل.س)" if lang=="ar" else "Total Revenue (SYP)"),
+    ]
+    for col, (num, lbl) in zip([c1,c2,c3,c4], stats):
+        with col:
+            st.markdown(f"""
+            <div class="kpi-card">
+                <div class="kpi-num">{num}</div>
+                <div class="kpi-lbl">{lbl}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Data preview ──────────────────────────────────────────────
+    preview_lbl = "#### معاينة البيانات" if lang=="ar" else "#### Data preview"
+    with st.expander(preview_lbl, expanded=False):
+        st.dataframe(df_company.head(10), use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+
+    # ── Analysis tabs ─────────────────────────────────────────────
+    if lang == "ar":
+        tabs_lbl = ["📍 المبيعات حسب المحافظة","📦 المبيعات حسب الفئة",
+                    "📈 الإيرادات عبر الزمن","🏆 أفضل المنتجات","🔍 مقارنة مرجعية"]
+    else:
+        tabs_lbl = ["📍 Sales by Region","📦 Sales by Category",
+                    "📈 Revenue Over Time","🏆 Top Products","🔍 Benchmark Comparison"]
+
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(tabs_lbl)
+
+    # Tab 1 — Sales by region
+    with tab1:
+        rev_region = (
+            df_company.groupby("governorate")["total_revenue_syp"]
+            .sum().sort_values(ascending=False).reset_index()
+        )
+        fig1 = px.bar(
+            rev_region,
+            x="governorate", y="total_revenue_syp",
+            color="total_revenue_syp",
+            color_continuous_scale="Blues",
+            title="Total Revenue by Governorate (SYP)" if lang=="en" else "إجمالي الإيرادات حسب المحافظة (ل.س)",
+            labels={"total_revenue_syp": "Revenue (SYP)", "governorate": "Governorate"},
+        )
+        fig1.update_layout(xaxis_tickangle=-45, height=420,
+                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                           showlegend=False)
+        st.plotly_chart(fig1, use_container_width=True)
+
+        # Table
+        rev_region["total_revenue_syp"] = rev_region["total_revenue_syp"].apply(
+            lambda x: f"{x:,.0f}"
+        )
+        st.dataframe(rev_region, use_container_width=True, hide_index=True)
+
+    # Tab 2 — Sales by category
+    with tab2:
+        rev_cat = (
+            df_company.groupby("category")["total_revenue_syp"]
+            .sum().reset_index()
+        )
+        fig2 = px.pie(
+            rev_cat, values="total_revenue_syp", names="category",
+            title="Revenue Share by Category" if lang=="en" else "حصة الإيرادات حسب الفئة",
+            color_discrete_sequence=["#2E7D32","#E65100","#1F4E79","#C62828"],
+        )
+        fig2.update_layout(height=420)
+        st.plotly_chart(fig2, use_container_width=True)
+
+    # Tab 3 — Revenue over time
+    with tab3:
+        df_monthly = (
+            df_company.dropna(subset=["date"])
+            .groupby(df_company["date"].dt.to_period("M"))["total_revenue_syp"]
+            .sum().reset_index()
+        )
+        df_monthly["date"] = df_monthly["date"].astype(str)
+
+        fig3 = px.line(
+            df_monthly, x="date", y="total_revenue_syp",
+            title="Monthly Revenue Trend (SYP)" if lang=="en" else "اتجاه الإيرادات الشهرية (ل.س)",
+            labels={"total_revenue_syp": "Revenue (SYP)", "date": "Month"},
+            markers=True,
+        )
+        fig3.update_traces(line_color="#2E75B6", line_width=2.5)
+        fig3.update_layout(height=420,
+                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig3, use_container_width=True)
+
+    # Tab 4 — Top products
+    with tab4:
+        top_products = (
+            df_company.groupby("product_name")
+            .agg(total_revenue=("total_revenue_syp","sum"),
+                 total_qty=("quantity_sold","sum"))
+            .sort_values("total_revenue", ascending=False)
+            .head(10).reset_index()
+        )
+
+        fig4 = px.bar(
+            top_products, x="total_revenue", y="product_name",
+            orientation="h",
+            title="Top 10 Products by Revenue" if lang=="en" else "أفضل 10 منتجات حسب الإيراد",
+            labels={"total_revenue": "Revenue (SYP)", "product_name": "Product"},
+            color="total_revenue", color_continuous_scale="Greens",
+        )
+        fig4.update_layout(yaxis=dict(autorange="reversed"), height=420,
+                           plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+                           showlegend=False)
+        st.plotly_chart(fig4, use_container_width=True)
+
+    # Tab 5 — Benchmark comparison
+    with tab5:
+        if lang == "ar":
+            st.markdown("#### مقارنة محافظاتك بالمعايير الوطنية")
+            st.markdown("""
+            <div class="insight">
+                تقارن هذه الخريطة محافظاتك التشغيلية بتصنيف دخول السوق الوطني.
+                المحافظات ذات الدرجات المرتفعة تمتلك أفضل الظروف التجارية.
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("#### Your governorates vs national market entry benchmark")
+            st.markdown("""
+            <div class="insight">
+                This chart compares your operating governorates against the national
+                market entry ranking. Higher-scoring governorates have the best
+                commercial conditions.
+            </div>
+            """, unsafe_allow_html=True)
+
+        if not data["scores"].empty:
+            company_govs = df_company["governorate"].unique().tolist()
+            scores_bench = data["scores"].copy()
+            scores_bench["your_market"] = scores_bench["adm1_name"].isin(company_govs)
+            scores_bench["bar_color"] = scores_bench["your_market"].map(
+                {True: "#2E7D32", False: "#CCCCCC"}
+            )
+
+            fig5 = go.Figure(go.Bar(
+                x=scores_bench["composite_score"],
+                y=scores_bench["adm1_name"],
+                orientation="h",
+                marker_color=scores_bench["bar_color"],
+                text=scores_bench["composite_score"].round(1),
+                textposition="outside",
+            ))
+            fig5.update_layout(
+                title="🟢 Your markets  |  ⬜ Other governorates" if lang=="en"
+                      else "🟢 أسواقك  |  ⬜ محافظات أخرى",
+                xaxis=dict(title="Market Entry Score (0–100)", range=[0,115]),
+                yaxis=dict(autorange="reversed"),
+                height=540,
+                plot_bgcolor="rgba(0,0,0,0)",
+                paper_bgcolor="rgba(0,0,0,0)",
+                margin=dict(l=10, r=80, t=50, b=30),
+            )
+            st.plotly_chart(fig5, use_container_width=True)
+
+            # Show scores for company's governorates
+            comp_scores = scores_bench[scores_bench["your_market"]][
+                ["adm1_name","segment_name","composite_score",
+                 "score_purchasing","score_stability"]
+            ].copy()
+            comp_scores.columns = [
+                "Governorate","Segment","Score","Purchasing Power","Price Stability"
+            ]
+            for c in ["Score","Purchasing Power","Price Stability"]:
+                comp_scores[c] = comp_scores[c].round(1)
+
+            if not comp_scores.empty:
+                if lang == "ar":
+                    st.markdown("#### درجات محافظاتك")
+                else:
+                    st.markdown("#### Your governorates scores")
+                st.dataframe(comp_scores, use_container_width=True, hide_index=True)
+
+                # Key insight
+                best = comp_scores.sort_values("Score", ascending=False).iloc[0]
+                if lang == "ar":
+                    st.markdown(f"""
+                    <div class="finding">
+                        <b>🏆 أفضل سوق لديك: {best["Governorate"]}</b>
+                        بدرجة {best["Score"]}/100 — {best["Segment"]}
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="finding">
+                        <b>🏆 Your strongest market: {best["Governorate"]}</b>
+                        with score {best["Score"]}/100 — {best["Segment"]}
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                if lang == "ar":
+                    st.warning("لم يتم مطابقة أي محافظة في ملفك مع البيانات المرجعية. تحقق من تهجئة أسماء المحافظات.")
+                else:
+                    st.warning("No governorates in your file matched the benchmark data. Check governorate name spelling.")
+
+
 def main():
     if "logged_in" not in st.session_state:
         st.session_state["logged_in"] = False
@@ -1369,6 +1676,7 @@ def main():
         ("Forecasting",       "📈 Forecast"),
         ("Market Entry",      "🏆 Ranking"),
         ("Decision Support",  "🎯 Advisory"),
+        ("Upload",            "📤 Upload"),
         ("Methodology",       "📖 Method"),
     ]
 
@@ -1378,6 +1686,7 @@ def main():
         ("Price Intelligence","💰 Prices"),
         ("Market Entry",      "🏆 Ranking"),
         ("Decision Support",  "🎯 Advisory"),
+        ("Upload",            "📤 Upload"),
     ]
 
     page_list   = COMPANY_PAGES if role == "Company" else ALL_PAGES
@@ -1465,6 +1774,7 @@ def main():
     elif page == "Forecasting":       page_forecasting(data)
     elif page == "Market Entry":      page_market_entry(data)
     elif page == "Decision Support":  page_decision_support(data)
+    elif page == "Upload":            page_upload(data)
     elif page == "Methodology":       page_methodology(data)
 
 if __name__ == "__main__":
