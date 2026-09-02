@@ -964,21 +964,48 @@ def page_price_intelligence(data):
                 """, unsafe_allow_html=True)
 
             st.markdown(TP("price_wtp_all",lang))
-            wtp_com = wtp[wtp["commodity"]==com].sort_values("wtp_ceiling_syp", ascending=False)
+            wtp_com = wtp[wtp["commodity"]==com].sort_values(
+                "wtp_ceiling_syp", ascending=False
+            ).copy()
+
+            # Safe merge — fill NaN segment names to avoid Plotly groupby crash
             if not data["scores"].empty:
                 wtp_com = wtp_com.merge(
-                    data["scores"][["adm1_name","segment_name"]], on="adm1_name", how="left"
+                    data["scores"][["adm1_name","segment_name"]],
+                    on="adm1_name", how="left"
                 )
-            fig2 = px.bar(
-                wtp_com, x="adm1_name", y="wtp_ceiling_syp",
-                color="segment_name" if "segment_name" in wtp_com.columns else None,
-                color_discrete_map=COLORS,
-                labels={"wtp_ceiling_syp": "Max Price (SYP)", "adm1_name": "Governorate"},
-                title=f"WTP Ceiling — {com.replace(' - Retail','')}",
-            )
-            fig2.update_layout(xaxis_tickangle=-45, height=380,
-                               plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-            st.plotly_chart(fig2, use_container_width=True)
+                wtp_com["segment_name"] = wtp_com["segment_name"].fillna(
+                    "Stressed interior markets"
+                )
+                use_color = "segment_name"
+            else:
+                use_color = None
+
+            # Remove any rows with NaN in key columns
+            wtp_com = wtp_com.dropna(subset=["adm1_name","wtp_ceiling_syp"])
+
+            if wtp_com.empty:
+                st.info("No data available for this commodity.")
+            else:
+                fig2 = px.bar(
+                    wtp_com,
+                    x="adm1_name",
+                    y="wtp_ceiling_syp",
+                    color=use_color,
+                    color_discrete_map=COLORS,
+                    labels={
+                        "wtp_ceiling_syp" : "Max Price (SYP)",
+                        "adm1_name"       : "Governorate",
+                        "segment_name"    : "Segment",
+                    },
+                    title=f"WTP Ceiling — {com.replace(' - Retail','')}",
+                )
+                fig2.update_layout(
+                    xaxis_tickangle=-45, height=380,
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    paper_bgcolor="rgba(0,0,0,0)",
+                )
+                st.plotly_chart(fig2, use_container_width=True)
 
     # ── Tab 3 ─────────────────────────────────────────────────────
     with tab3:
@@ -1456,83 +1483,156 @@ def page_methodology(data):
             """, unsafe_allow_html=True)
 
     st.markdown(TP("method_modules",lang))
-    modules = [
-        ("A", "Consumer Segmentation",
-         "K-Means clustering (unsupervised machine learning)",
-         "Groups Syria's 14 governorates into natural consumer segments based on "
-         "price volatility, affordability index, and basket cost. Optimal K=3 determined "
-         "using the Elbow method (inertia) and Silhouette coefficient (peak score 0.475).",
-         "3 named consumer segment profiles with geographic distribution"),
-        ("B", "Geographic Demand Mapping",
-         "Plotly Mapbox choropleth + GeoPandas + GeoJSON",
-         "Joins analytical features to Syria's administrative boundary shapefile "
-         "(geoBoundaries ADM1). Three maps: consumer segments, affordability gradient, "
-         "and price volatility risk index.",
-         "3 interactive Syria maps — hover for governorate detail"),
-        ("C", "Price Sensitivity Analysis",
-         "OLS regression + income share computation",
-         "Computes income share (% of household income per commodity) and "
-         "willingness-to-pay ceilings using WFP Minimum Food Expenditure Basket quantities "
-         "and average household size of 4.3 persons. OLS models the relationship between "
-         "monthly price changes and affordability index changes.",
-         "WTP thresholds per product per region + bread affordability gap chart"),
-        ("D", "Temporal Forecasting",
-         "Facebook Prophet time series model",
-         "Prophet trained on 122 months of historical basket cost and affordability data. "
-         "Configured with multiplicative seasonality to handle exponential price growth. "
-         "Structural changepoints detected automatically. Seasonal Ramadan signal detected "
-         "from price data without explicit calendar input.",
-         "12-month forward projections with 80% confidence intervals"),
-        ("E", "Market Entry Scoring",
-         "Weighted composite scoring matrix",
-         "Five dimensions normalized 0–100 using min-max normalization. "
-         "Weights: Purchasing Power 30%, Price Stability 25%, Price Accessibility 25%, "
-         "Market Density 10%, Segment Quality 10%. All 14 governorates ranked.",
-         "Full governorate ranking with dimension-level score breakdown"),
-    ]
+    if lang == "ar":
+        modules = [
+            ("A", "تجميع المستهلكين",
+             "K-Means (تعلم آلي غير خاضع للإشراف)",
+             "يُجمّع 14 محافظة سورية في شرائح استهلاكية طبيعية بناءً على تذبذب الأسعار "
+             "ومؤشر القدرة الشرائية وتكلفة السلة. تم تحديد K=3 بطريقة الكوع ومعامل Silhouette "
+             "(أعلى قيمة 0.475).",
+             "3 ملفات تعريفية مُسمّاة للشرائح مع التوزيع الجغرافي"),
+            ("B", "خرائط الطلب الجغرافي",
+             "Plotly Mapbox choropleth + GeoPandas + GeoJSON",
+             "يربط الميزات التحليلية بملف الحدود الإدارية لسوريا (geoBoundaries ADM1). "
+             "ثلاث خرائط: شرائح المستهلكين، تدرج القدرة الشرائية، ومؤشر مخاطر تذبذب الأسعار.",
+             "3 خرائط سوريا تفاعلية — مرّر فوق أي محافظة للتفاصيل"),
+            ("C", "تحليل حساسية الأسعار",
+             "انحدار OLS + حساب حصة الدخل",
+             "يحسب حصة الدخل (% من دخل الأسرة لكل سلعة) وسقف الاستعداد للدفع "
+             "باستخدام كميات WFP وحجم أسرة متوسط 4.3 أشخاص. يُنمذج OLS العلاقة بين "
+             "تغيرات الأسعار الشهرية وتغيرات مؤشر القدرة الشرائية.",
+             "سقف الاستعداد للدفع لكل منتج لكل منطقة + مخطط فجوة الخبز"),
+            ("D", "التنبؤ الزمني",
+             "نموذج Prophet للسلاسل الزمنية (Facebook)",
+             "Prophet مُدرَّب على 122 شهراً من البيانات. مُكوَّن بنمط موسمية ضربية "
+             "لمعالجة النمو الأسي. نقاط التغيير الهيكلي مكتشفة تلقائياً. "
+             "تم رصد الإشارة الموسمية لرمضان من بيانات الأسعار.",
+             "توقعات 12 شهراً قادمة مع فترات ثقة 80%"),
+            ("E", "تسجيل دخول السوق",
+             "مصفوفة تسجيل مركّبة مرجّحة",
+             "خمسة أبعاد مُعيَّرة 0–100 بالتطبيع min-max. "
+             "الأوزان: القدرة الشرائية 30%، استقرار الأسعار 25%، إمكانية الوصول 25%، "
+             "كثافة السوق 10%، جودة الشريحة 10%. تصنيف جميع المحافظات الـ14.",
+             "تصنيف كامل للمحافظات مع تفاصيل الأبعاد"),
+        ]
+        meth_lbl = "الأسلوب"
+        out_lbl  = "الناتج"
+        desc_lbl = "الوصف"
+        exp_prefix = "الوحدة"
+    else:
+        modules = [
+            ("A", "Consumer Segmentation",
+             "K-Means clustering (unsupervised machine learning)",
+             "Groups Syria's 14 governorates into natural consumer segments based on "
+             "price volatility, affordability index, and basket cost. Optimal K=3 determined "
+             "using the Elbow method (inertia) and Silhouette coefficient (peak score 0.475).",
+             "3 named consumer segment profiles with geographic distribution"),
+            ("B", "Geographic Demand Mapping",
+             "Plotly Mapbox choropleth + GeoPandas + GeoJSON",
+             "Joins analytical features to Syria's administrative boundary shapefile "
+             "(geoBoundaries ADM1). Three maps: consumer segments, affordability gradient, "
+             "and price volatility risk index.",
+             "3 interactive Syria maps — hover for governorate detail"),
+            ("C", "Price Sensitivity Analysis",
+             "OLS regression + income share computation",
+             "Computes income share (% of household income per commodity) and "
+             "willingness-to-pay ceilings using WFP Minimum Food Expenditure Basket quantities "
+             "and average household size of 4.3 persons. OLS models the relationship between "
+             "monthly price changes and affordability index changes.",
+             "WTP thresholds per product per region + bread affordability gap chart"),
+            ("D", "Temporal Forecasting",
+             "Facebook Prophet time series model",
+             "Prophet trained on 122 months of historical basket cost and affordability data. "
+             "Configured with multiplicative seasonality to handle exponential price growth. "
+             "Structural changepoints detected automatically. Seasonal Ramadan signal detected "
+             "from price data without explicit calendar input.",
+             "12-month forward projections with 80% confidence intervals"),
+            ("E", "Market Entry Scoring",
+             "Weighted composite scoring matrix",
+             "Five dimensions normalized 0–100 using min-max normalization. "
+             "Weights: Purchasing Power 30%, Price Stability 25%, Price Accessibility 25%, "
+             "Market Density 10%, Segment Quality 10%. All 14 governorates ranked.",
+             "Full governorate ranking with dimension-level score breakdown"),
+        ]
+        meth_lbl = "Method"
+        out_lbl  = "Output"
+        desc_lbl = "Description"
+        exp_prefix = "Module"
 
     for letter, name, method, desc, output in modules:
-        with st.expander(f"Module {letter} — {name}", expanded=False):
+        with st.expander(f"{exp_prefix} {letter} — {name}", expanded=False):
             c1, c2 = st.columns([1, 2])
             with c1:
-                st.markdown(f"**Method:** {method}")
-                st.markdown(f"**Output:** {output}")
+                st.markdown(f"**{meth_lbl}:** {method}")
+                st.markdown(f"**{out_lbl}:** {output}")
             with c2:
-                st.markdown(f"**Description:** {desc}")
+                st.markdown(f"**{desc_lbl}:** {desc}")
 
     st.markdown(TP("method_limits",lang))
-    st.markdown("""
-    <div class="warning">
-        <b>Data cutoff:</b> The WFP dataset covers April 2011 through June 2021.
-        The 2011–2021 window captures the full arc of Syria's economic crisis —
-        from the pre-conflict baseline through the 2020–2021 hyperinflationary collapse.
-    </div>
-    <div class="warning">
-        <b>Basket cost note:</b> The quantity-weighted basket cost may slightly overestimate
-        true household expenditure due to simultaneous inclusion of both wheat flour and bread.
-        This represents a conservative upper-bound estimate consistent with food security
-        worst-case scenarios.
-    </div>
-    <div class="insight">
-        <b>Geographic granularity:</b> All analysis is at governorate level (ADM1).
-        Sub-governorate variation within each region is not captured in this version.
-        City-level analysis is planned for v2.
-    </div>
-    """, unsafe_allow_html=True)
+    if lang == "ar":
+        st.markdown("""
+        <div class="warning">
+            <b>قطع البيانات:</b> تغطي بيانات WFP الفترة من أبريل 2011 إلى يونيو 2021.
+            تلتقط هذه النافذة القوس الكامل لأزمة سوريا الاقتصادية —
+            من الخط الأساسي قبل النزاع حتى انهيار التضخم المفرط 2020–2021.
+        </div>
+        <div class="warning">
+            <b>ملاحظة تكلفة السلة:</b> قد تُبالغ تكلفة السلة المرجّحة بالكميات قليلاً
+            في تقدير الإنفاق الفعلي للأسرة بسبب تضمين دقيق القمح والخبز معاً.
+            يمثّل هذا تقديراً محافظاً للحد الأعلى متوافقاً مع سيناريوهات الأمن الغذائي الأسوأ.
+        </div>
+        <div class="insight">
+            <b>دقة جغرافية:</b> جميع التحليلات على مستوى المحافظة (ADM1).
+            لا يُرصد التباين داخل كل محافظة في هذا الإصدار. تحليل المدينة مخطط للإصدار v2.
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="warning">
+            <b>Data cutoff:</b> The WFP dataset covers April 2011 through June 2021.
+            The 2011–2021 window captures the full arc of Syria's economic crisis —
+            from the pre-conflict baseline through the 2020–2021 hyperinflationary collapse.
+        </div>
+        <div class="warning">
+            <b>Basket cost note:</b> The quantity-weighted basket cost may slightly overestimate
+            true household expenditure due to simultaneous inclusion of both wheat flour and bread.
+            This represents a conservative upper-bound estimate consistent with food security
+            worst-case scenarios.
+        </div>
+        <div class="insight">
+            <b>Geographic granularity:</b> All analysis is at governorate level (ADM1).
+            Sub-governorate variation within each region is not captured in this version.
+            City-level analysis is planned for v2.
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown(TP("method_tech",lang))
-    tech = [
-        ("Python 3.12",      "Core programming language"),
-        ("Pandas + NumPy",   "Data processing and feature engineering"),
-        ("Scikit-learn",     "K-Means clustering and StandardScaler normalization"),
-        ("Statsmodels",      "OLS regression analysis"),
-        ("Prophet",          "Time series forecasting"),
-        ("Plotly",           "Interactive charts and maps"),
-        ("GeoPandas",        "Geospatial data processing"),
-        ("Streamlit",        "Web application framework"),
-        ("WFP / HDX",        "Primary data source (humanitarian food prices)"),
-        ("geoBoundaries",    "Syria administrative boundary shapefile"),
-    ]
+    if lang == "ar":
+        tech = [
+            ("Python 3.12",     "لغة البرمجة الأساسية"),
+            ("Pandas + NumPy",  "معالجة البيانات وهندسة الميزات"),
+            ("Scikit-learn",    "K-Means والتطبيع بـ StandardScaler"),
+            ("Statsmodels",     "تحليل الانحدار OLS"),
+            ("Prophet",         "التنبؤ بالسلاسل الزمنية"),
+            ("Plotly",          "الرسوم البيانية والخرائط التفاعلية"),
+            ("GeoPandas",       "معالجة البيانات الجيومكانية"),
+            ("Streamlit",       "إطار تطبيق الويب"),
+            ("WFP / HDX",       "مصدر البيانات الأساسي (أسعار الغذاء الإنسانية)"),
+            ("geoBoundaries",   "ملف حدود المحافظات السورية"),
+        ]
+    else:
+        tech = [
+            ("Python 3.12",     "Core programming language"),
+            ("Pandas + NumPy",  "Data processing and feature engineering"),
+            ("Scikit-learn",    "K-Means clustering and StandardScaler normalization"),
+            ("Statsmodels",     "OLS regression analysis"),
+            ("Prophet",         "Time series forecasting"),
+            ("Plotly",          "Interactive charts and maps"),
+            ("GeoPandas",       "Geospatial data processing"),
+            ("Streamlit",       "Web application framework"),
+            ("WFP / HDX",       "Primary data source (humanitarian food prices)"),
+            ("geoBoundaries",   "Syria administrative boundary shapefile"),
+        ]
     c1, c2 = st.columns(2)
     for i, (tool, desc) in enumerate(tech):
         with (c1 if i % 2 == 0 else c2):
