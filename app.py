@@ -717,38 +717,40 @@ def page_geographic_maps(data):
                 🔴 <b>Red</b> = Fragmented urban centers — Damascus, Aleppo
             </div>""", unsafe_allow_html=True)
 
-        fig1 = go.Figure(go.Choroplethmapbox(
+        segs_plot = segs.copy()
+        segs_plot["seg_label"] = segs_plot["segment_name"]
+        fig1 = px.choropleth_mapbox(
+            segs_plot,
             geojson=geo,
-            locations=segs["adm1_name"],
-            z=segs["seg_code"],
+            locations="adm1_name",
             featureidkey="properties.adm1_name",
-            colorscale=[
+            color="seg_code",
+            color_continuous_scale=[
                 [0.00,"#C62828"],[0.33,"#C62828"],
                 [0.34,"#E65100"],[0.66,"#E65100"],
                 [0.67,"#2E7D32"],[1.00,"#2E7D32"],
             ],
-            zmin=0, zmax=2,
-            marker_opacity=0.85,
-            marker_line_width=1,
-            marker_line_color="white",
-            showscale=False,
-            text=segs["adm1_name"],
-            customdata=segs[["segment_name","avg_affordability","volatility_index"]],
-            hovertemplate=(
-                "<b>%{text}</b><br>"
-                "Segment: %{customdata[0]}<br>"
-                "Affordability: %{customdata[1]:.3f}<br>"
-                "Volatility: %{customdata[2]:.1f}%"
-                "<extra></extra>"
-            ),
-        ))
-        fig1.update_layout(
+            range_color=[0,2],
             mapbox_style=MAPBOX_STYLE,
-            mapbox_zoom=ZOOM,
-            mapbox_center=CENTER,
-            height=HEIGHT,
-            margin=dict(l=0,r=0,t=20,b=0),
+            zoom=ZOOM,
+            center=CENTER,
+            opacity=0.85,
+            hover_name="adm1_name",
+            hover_data={
+                "seg_label"      : True,
+                "avg_affordability": ":.3f",
+                "volatility_index" : ":.1f",
+                "seg_code"         : False,
+                "adm1_name"        : False,
+            },
+            labels={
+                "seg_label"       : "Segment",
+                "avg_affordability": "Affordability",
+                "volatility_index" : "Volatility %",
+            },
         )
+        fig1.update_coloraxes(showscale=False)
+        fig1.update_layout(height=HEIGHT, margin=dict(l=0,r=0,t=20,b=0))
         st.plotly_chart(fig1, use_container_width=True)
 
     # ── Tab 2: Affordability Heatmap ──────────────────────────────
@@ -766,46 +768,47 @@ def page_geographic_maps(data):
             </div>""", unsafe_allow_html=True)
 
         max_a = 1.4
-        fig2 = go.Figure(go.Choroplethmapbox(
+        fig2 = px.choropleth_mapbox(
+            segs,
             geojson=geo,
-            locations=segs["adm1_name"],
-            z=segs["avg_affordability"],
+            locations="adm1_name",
             featureidkey="properties.adm1_name",
-            colorscale=[
-                [0.00,            "#C62828"],
-                [0.35/max_a,      "#EF5350"],
-                [0.60/max_a,      "#FFA726"],
-                [0.85/max_a,      "#FFEE58"],
-                [1.00/max_a,      "#A5D6A7"],
-                [1.00,            "#2E7D32"],
+            color="avg_affordability",
+            color_continuous_scale=[
+                [0.00,           "#C62828"],
+                [0.35/max_a,     "#EF5350"],
+                [0.60/max_a,     "#FFA726"],
+                [0.85/max_a,     "#FFEE58"],
+                [1.00/max_a,     "#A5D6A7"],
+                [1.00,           "#2E7D32"],
             ],
-            zmin=0, zmax=max_a,
+            range_color=[0, max_a],
+            mapbox_style=MAPBOX_STYLE,
+            zoom=ZOOM,
+            center=CENTER,
+            opacity=0.85,
+            hover_name="adm1_name",
+            hover_data={
+                "avg_affordability": ":.3f",
+                "volatility_index"  : ":.1f",
+                "segment_name"      : True,
+                "adm1_name"         : False,
+            },
+            labels={
+                "avg_affordability": "Affordability Index",
+                "volatility_index"  : "Volatility %",
+                "segment_name"      : "Segment",
+            },
+        )
+        fig2.update_coloraxes(
             colorbar=dict(
                 title="Affordability<br>Index",
-                tickvals=[0,0.5,1.0,1.4],
+                tickvals=[0, 0.5, 1.0, 1.4],
                 ticktext=["0.0","0.5","1.0 ← threshold","1.4"],
                 len=0.6,
-            ),
-            marker_opacity=0.85,
-            marker_line_width=1,
-            marker_line_color="white",
-            text=segs["adm1_name"],
-            customdata=segs[["avg_affordability","volatility_index","segment_name"]],
-            hovertemplate=(
-                "<b>%{text}</b><br>"
-                "Affordability: %{customdata[0]:.3f}<br>"
-                "Volatility: %{customdata[1]:.1f}%<br>"
-                "Segment: %{customdata[2]}"
-                "<extra></extra>"
-            ),
-        ))
-        fig2.update_layout(
-            mapbox_style=MAPBOX_STYLE,
-            mapbox_zoom=ZOOM,
-            mapbox_center=CENTER,
-            height=HEIGHT,
-            margin=dict(l=0,r=0,t=20,b=0),
+            )
         )
+        fig2.update_layout(height=HEIGHT, margin=dict(l=0,r=0,t=20,b=0))
         st.plotly_chart(fig2, use_container_width=True)
 
     # ── Tab 3: Price Volatility Risk ──────────────────────────────
@@ -831,36 +834,33 @@ def page_geographic_maps(data):
             map_vol = segs[["adm1_name","volatility_index"]].copy()
             map_vol.columns = ["adm1_name","regional_volatility_index"]
 
-        fig3 = go.Figure(go.Choroplethmapbox(
+        fig3 = px.choropleth_mapbox(
+            map_vol,
             geojson=geo,
-            locations=map_vol["adm1_name"],
-            z=map_vol["regional_volatility_index"],
+            locations="adm1_name",
             featureidkey="properties.adm1_name",
-            colorscale="Reds",
-            zmin=40, zmax=100,
+            color="regional_volatility_index",
+            color_continuous_scale="Reds",
+            range_color=[40, 100],
+            mapbox_style=MAPBOX_STYLE,
+            zoom=ZOOM,
+            center=CENTER,
+            opacity=0.85,
+            hover_name="adm1_name",
+            hover_data={
+                "regional_volatility_index": ":.1f",
+                "adm1_name": False,
+            },
+            labels={"regional_volatility_index": "Volatility Index (%)"},
+        )
+        fig3.update_coloraxes(
             colorbar=dict(
                 title="Volatility<br>Index (%)",
                 tickvals=[40,60,80,100],
                 len=0.6,
-            ),
-            marker_opacity=0.85,
-            marker_line_width=1,
-            marker_line_color="white",
-            text=map_vol["adm1_name"],
-            customdata=map_vol[["regional_volatility_index"]],
-            hovertemplate=(
-                "<b>%{text}</b><br>"
-                "Volatility Index: %{customdata[0]:.1f}%"
-                "<extra></extra>"
-            ),
-        ))
-        fig3.update_layout(
-            mapbox_style=MAPBOX_STYLE,
-            mapbox_zoom=ZOOM,
-            mapbox_center=CENTER,
-            height=HEIGHT,
-            margin=dict(l=0,r=0,t=20,b=0),
+            )
         )
+        fig3.update_layout(height=HEIGHT, margin=dict(l=0,r=0,t=20,b=0))
         st.plotly_chart(fig3, use_container_width=True)
 
     # ── Summary table ─────────────────────────────────────────────
