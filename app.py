@@ -616,23 +616,47 @@ def page_consumer_profiles(data):
 
     st.markdown("---")
     st.markdown(TP("profiles_seg",lang))
+    # Fill NaN segment names before plotting — prevents Plotly groupby crash
+    segs_plot = segs.copy()
+    segs_plot["segment_name"] = segs_plot["segment_name"].fillna(
+        "Stressed interior markets"
+    )
+    segs_plot["adm1_name"] = segs_plot["adm1_name"].fillna("Unknown")
+    segs_plot = segs_plot.dropna(subset=["volatility_index","avg_affordability"])
+
+    scatter_title = (
+        "خريطة الشرائح الاستهلاكية — كل فقاعة محافظة سورية"
+        if lang == "ar" else
+        "Consumer Segment Map — each bubble is one Syrian governorate"
+    )
+    seg_label = "الشريحة" if lang == "ar" else "Segment"
+    vol_label = "مؤشر التذبذب (CoV %)" if lang == "ar" else "Price Volatility Index (CoV %)"
+    aff_label = "متوسط مؤشر القدرة الشرائية" if lang == "ar" else "Average Affordability Index"
+
     fig = px.scatter(
-        segs,
+        segs_plot,
         x="volatility_index", y="avg_affordability",
         color="segment_name", text="adm1_name",
         size="avg_basket_cost",
         color_discrete_map=COLORS,
         labels={
-            "volatility_index"  : "Price Volatility Index (CoV %)",
-            "avg_affordability" : "Average Affordability Index",
-            "segment_name"      : "Segment",
+            "volatility_index"  : vol_label,
+            "avg_affordability" : aff_label,
+            "segment_name"      : seg_label,
         },
-        title="Consumer Segment Map — each bubble is one Syrian governorate",
+        title=scatter_title,
     )
-    fig.add_hline(y=1.0, line_dash="dash", line_color="gray",
-                  annotation_text="Affordability threshold (1.0)")
+    fig.add_hline(
+        y=1.0, line_dash="dash", line_color="gray",
+        annotation_text="عتبة القدرة الشرائية (1.0)" if lang=="ar"
+                        else "Affordability threshold (1.0)"
+    )
     fig.update_traces(textposition="top center")
-    fig.update_layout(height=480, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
+    fig.update_layout(
+        height=480,
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)"
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 # ── Geographic Maps ───────────────────────────────────────────────
@@ -968,12 +992,13 @@ def page_price_intelligence(data):
                 "wtp_ceiling_syp", ascending=False
             ).copy()
 
-            # Safe merge — fill NaN segment names to avoid Plotly groupby crash
+            # Merge segment names safely
             if not data["scores"].empty:
                 wtp_com = wtp_com.merge(
                     data["scores"][["adm1_name","segment_name"]],
                     on="adm1_name", how="left"
                 )
+                # Critical: fill NaN to prevent Plotly groupby crash
                 wtp_com["segment_name"] = wtp_com["segment_name"].fillna(
                     "Stressed interior markets"
                 )
@@ -981,12 +1006,14 @@ def page_price_intelligence(data):
             else:
                 use_color = None
 
-            # Remove any rows with NaN in key columns
             wtp_com = wtp_com.dropna(subset=["adm1_name","wtp_ceiling_syp"])
 
-            if wtp_com.empty:
-                st.info("No data available for this commodity.")
-            else:
+            if not wtp_com.empty:
+                wtp_title = (
+                    f"سقف الاستعداد للدفع — {com.replace(' - Retail','')}"
+                    if lang == "ar" else
+                    f"WTP Ceiling — {com.replace(' - Retail','')}"
+                )
                 fig2 = px.bar(
                     wtp_com,
                     x="adm1_name",
@@ -994,11 +1021,11 @@ def page_price_intelligence(data):
                     color=use_color,
                     color_discrete_map=COLORS,
                     labels={
-                        "wtp_ceiling_syp" : "Max Price (SYP)",
-                        "adm1_name"       : "Governorate",
-                        "segment_name"    : "Segment",
+                        "wtp_ceiling_syp": "Max Price (SYP)" if lang=="en" else "السعر الأقصى (ل.س)",
+                        "adm1_name"      : "Governorate" if lang=="en" else "المحافظة",
+                        "segment_name"   : "Segment" if lang=="en" else "الشريحة",
                     },
-                    title=f"WTP Ceiling — {com.replace(' - Retail','')}",
+                    title=wtp_title,
                 )
                 fig2.update_layout(
                     xaxis_tickangle=-45, height=380,
@@ -1165,9 +1192,22 @@ def page_market_entry(data):
     sc = clean_col(data["scores"].sort_values("rank"))
 
     with st.expander(TP("ranking_how",lang)):
-        dims = [("Purchasing Power","30%"), ("Price Stability","25%"),
-                ("Price Accessibility","25%"), ("Market Density","10%"),
-                ("Segment Quality","10%")]
+        if lang == "ar":
+            dims = [
+                ("القدرة الشرائية","30%"),
+                ("استقرار الأسعار","25%"),
+                ("إمكانية الوصول للأسعار","25%"),
+                ("كثافة السوق","10%"),
+                ("جودة الشريحة","10%"),
+            ]
+        else:
+            dims = [
+                ("Purchasing Power","30%"),
+                ("Price Stability","25%"),
+                ("Price Accessibility","25%"),
+                ("Market Density","10%"),
+                ("Segment Quality","10%"),
+            ]
         cols = st.columns(5)
         for col, (dim, wt) in zip(cols, dims):
             with col:
@@ -1209,9 +1249,15 @@ def page_market_entry(data):
 
         disp = sc[["rank","adm1_name","segment_name","composite_score",
                    "score_purchasing","score_stability","score_access"]].copy()
-        disp.columns = ["Rank","Governorate","Segment","Score",
-                        "Purchasing Power","Price Stability","Price Access"]
-        for c in ["Score","Purchasing Power","Price Stability","Price Access"]:
+        if lang == "ar":
+            disp.columns = ["الترتيب","المحافظة","الشريحة","الدرجة",
+                            "القدرة الشرائية","استقرار الأسعار","إمكانية الوصول"]
+            num_cols = ["الدرجة","القدرة الشرائية","استقرار الأسعار","إمكانية الوصول"]
+        else:
+            disp.columns = ["Rank","Governorate","Segment","Score",
+                            "Purchasing Power","Price Stability","Price Access"]
+            num_cols = ["Score","Purchasing Power","Price Stability","Price Access"]
+        for c in num_cols:
             disp[c] = disp[c].round(1)
         st.dataframe(disp, use_container_width=True, hide_index=True)
 
