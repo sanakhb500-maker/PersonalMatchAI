@@ -616,46 +616,58 @@ def page_consumer_profiles(data):
 
     st.markdown("---")
     st.markdown(TP("profiles_seg",lang))
-    # Fill NaN segment names before plotting — prevents Plotly groupby crash
-    segs_plot = segs.copy()
-    segs_plot["segment_name"] = segs_plot["segment_name"].fillna(
-        "Stressed interior markets"
-    )
-    segs_plot["adm1_name"] = segs_plot["adm1_name"].fillna("Unknown")
-    segs_plot = segs_plot.dropna(subset=["volatility_index","avg_affordability"])
+
+    segs_plot = segs.copy().dropna(subset=["volatility_index","avg_affordability"])
+    segs_plot["segment_name"] = segs_plot["segment_name"].fillna("Stressed interior markets")
 
     scatter_title = (
-        "خريطة الشرائح الاستهلاكية — كل فقاعة محافظة سورية"
-        if lang == "ar" else
-        "Consumer Segment Map — each bubble is one Syrian governorate"
+        "خريطة الشرائح الاستهلاكية — كل فقاعة محافظة سورية" if lang=="ar"
+        else "Consumer Segment Map — each bubble is one Syrian governorate"
     )
-    seg_label = "الشريحة" if lang == "ar" else "Segment"
-    vol_label = "مؤشر التذبذب (CoV %)" if lang == "ar" else "Price Volatility Index (CoV %)"
-    aff_label = "متوسط مؤشر القدرة الشرائية" if lang == "ar" else "Average Affordability Index"
+    vol_label = "مؤشر التذبذب (CoV %)" if lang=="ar" else "Price Volatility Index (CoV %)"
+    aff_label = "متوسط مؤشر القدرة الشرائية" if lang=="ar" else "Average Affordability Index"
 
-    fig = px.scatter(
-        segs_plot,
-        x="volatility_index", y="avg_affordability",
-        color="segment_name", text="adm1_name",
-        size="avg_basket_cost",
-        color_discrete_map=COLORS,
-        labels={
-            "volatility_index"  : vol_label,
-            "avg_affordability" : aff_label,
-            "segment_name"      : seg_label,
-        },
-        title=scatter_title,
-    )
+    # Build figure manually — avoids Plotly color groupby bug
+    fig = go.Figure()
+    for seg_name, color in COLORS.items():
+        subset = segs_plot[segs_plot["segment_name"] == seg_name]
+        if subset.empty:
+            continue
+        sizes = (subset["avg_basket_cost"].fillna(200000) / 10000).clip(8, 40).tolist()
+        fig.add_trace(go.Scatter(
+            x=subset["volatility_index"],
+            y=subset["avg_affordability"],
+            mode="markers+text",
+            name=seg_name,
+            text=subset["adm1_name"],
+            textposition="top center",
+            marker=dict(
+                color=color,
+                size=sizes,
+                opacity=0.85,
+                line=dict(color="white", width=1),
+            ),
+            hovertemplate=(
+                "<b>%{text}</b><br>"
+                f"{vol_label}: %{{x:.1f}}<br>"
+                f"{aff_label}: %{{y:.3f}}"
+                "<extra></extra>"
+            ),
+        ))
+
     fig.add_hline(
         y=1.0, line_dash="dash", line_color="gray",
         annotation_text="عتبة القدرة الشرائية (1.0)" if lang=="ar"
-                        else "Affordability threshold (1.0)"
+                        else "Affordability threshold (1.0)",
     )
-    fig.update_traces(textposition="top center")
     fig.update_layout(
+        title=scatter_title,
+        xaxis_title=vol_label,
+        yaxis_title=aff_label,
         height=480,
         plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)"
+        paper_bgcolor="rgba(0,0,0,0)",
+        legend_title="الشريحة" if lang=="ar" else "Segment",
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -929,6 +941,7 @@ def page_price_intelligence(data):
             st.info("income_share data not found.")
         else:
             df = data["income_share"].head(15).copy()
+            df = df.dropna(subset=["avg_share","min_share","max_share"])
             fig = go.Figure()
             fig.add_trace(go.Bar(
                 x=df["cm_name"],
@@ -1014,21 +1027,29 @@ def page_price_intelligence(data):
                     if lang == "ar" else
                     f"WTP Ceiling — {com.replace(' - Retail','')}"
                 )
-                fig2 = px.bar(
-                    wtp_com,
-                    x="adm1_name",
-                    y="wtp_ceiling_syp",
-                    color=use_color,
-                    color_discrete_map=COLORS,
-                    labels={
-                        "wtp_ceiling_syp": "Max Price (SYP)" if lang=="en" else "السعر الأقصى (ل.س)",
-                        "adm1_name"      : "Governorate" if lang=="en" else "المحافظة",
-                        "segment_name"   : "Segment" if lang=="en" else "الشريحة",
-                    },
-                    title=wtp_title,
-                )
+                # Assign colors per row — avoids Plotly color groupby bug
+                bar_colors = [
+                    COLORS.get(s, "#2E75B6")
+                    for s in wtp_com.get("segment_name",
+                        ["Stressed interior markets"]*len(wtp_com))
+                ]
+                fig2 = go.Figure(go.Bar(
+                    x=wtp_com["adm1_name"],
+                    y=wtp_com["wtp_ceiling_syp"],
+                    marker_color=bar_colors,
+                    hovertemplate=(
+                        "<b>%{x}</b><br>"
+                        + ("السعر الأقصى: %{y:,.0f} ل.س" if lang=="ar"
+                           else "Max Price: %{y:,.0f} SYP")
+                        + "<extra></extra>"
+                    ),
+                ))
                 fig2.update_layout(
-                    xaxis_tickangle=-45, height=380,
+                    title=wtp_title,
+                    xaxis_title="المحافظة" if lang=="ar" else "Governorate",
+                    yaxis_title="السعر الأقصى (ل.س)" if lang=="ar" else "Max Price (SYP)",
+                    xaxis_tickangle=-45,
+                    height=380,
                     plot_bgcolor="rgba(0,0,0,0)",
                     paper_bgcolor="rgba(0,0,0,0)",
                 )
