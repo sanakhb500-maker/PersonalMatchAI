@@ -445,7 +445,8 @@ COLORS = {
     "Stressed interior markets"       : "#E65100",
     "Fragmented major urban centers"  : "#C62828",
 }
-CUTOFF = pd.Timestamp("2021-06-01")
+CUTOFF       = pd.Timestamp("2021-06-01")
+TRAIN_CUTOFF = pd.Timestamp("2020-06-01")  # train/test split point
 
 # Clean display names — remove underscores and standardize
 NAME_MAP = {
@@ -1103,41 +1104,84 @@ def page_forecasting(data):
         if fc.empty:
             st.info("Forecast data not found.")
             return
-        hist = fc[fc["ds"] <= CUTOFF]
-        fut  = fc[fc["ds"] >  CUTOFF]
+
+        # Split into training period, test period
+        train = fc[fc["ds"] <= TRAIN_CUTOFF]
+        test  = fc[(fc["ds"] > TRAIN_CUTOFF) & (fc["ds"] <= CUTOFF)]
+
+        if lang == "ar":
+            lbl_train = "بيانات التدريب (ملاءمة النموذج)"
+            lbl_ci    = "فترة ثقة 80% (مجموعة الاختبار)"
+            lbl_pred  = "متوقّع — مجموعة الاختبار"
+            lbl_split = "بداية مجموعة الاختبار"
+            lbl_data  = "نهاية البيانات"
+        else:
+            lbl_train = "Training data (model fit)"
+            lbl_ci    = "80% confidence interval (test set)"
+            lbl_pred  = "Predicted — test set"
+            lbl_split = "Test set begins"
+            lbl_data  = "End of data"
+
         fig  = go.Figure()
 
+        # Confidence band (test period only)
+        if not test.empty:
+            fig.add_trace(go.Scatter(
+                x=pd.concat([test["ds"], test["ds"][::-1]]),
+                y=pd.concat([test["yhat_upper"], test["yhat_lower"][::-1]]),
+                fill="toself",
+                fillcolor=f"rgba{tuple(list(px.colors.hex_to_rgb(color)) + [40])}",
+                line=dict(color="rgba(0,0,0,0)"), name=lbl_ci,
+            ))
+
+        # Training line
         fig.add_trace(go.Scatter(
-            x=pd.concat([fut["ds"], fut["ds"][::-1]]),
-            y=pd.concat([fut["yhat_upper"], fut["yhat_lower"][::-1]]),
-            fill="toself", fillcolor=f"rgba{tuple(list(px.colors.hex_to_rgb(color)) + [40])}",
-            line=dict(color="rgba(0,0,0,0)"), name="80% confidence interval",
+            x=train["ds"], y=train["yhat"], mode="lines",
+            name=lbl_train, line=dict(color="#1F4E79", width=2),
         ))
-        fig.add_trace(go.Scatter(
-            x=hist["ds"], y=hist["yhat"], mode="lines",
-            name="Historical (model fit)", line=dict(color="#1F4E79", width=2),
-        ))
-        fig.add_trace(go.Scatter(
-            x=fut["ds"], y=fut["yhat"], mode="lines",
-            name="12-month forecast", line=dict(color=color, width=2.5, dash="dash"),
-        ))
+
+        # Test period predicted line
+        if not test.empty:
+            fig.add_trace(go.Scatter(
+                x=test["ds"], y=test["yhat"],
+                mode="lines+markers",
+                name=lbl_pred,
+                line=dict(color=color, width=2.5, dash="dash"),
+                marker=dict(size=6),
+            ))
+
+        # Threshold line
         if threshold is not None:
             fig.add_shape(type="line", x0=0, x1=1, xref="paper",
                           y0=threshold, y1=threshold,
                           line=dict(dash="dash", color="green", width=1.5))
             fig.add_annotation(x=0.01, xref="paper", y=threshold,
-                               text=f"Threshold ({threshold})", showarrow=False,
-                               xanchor="left", yanchor="bottom",
+                               text=f"Affordability threshold ({threshold})",
+                               showarrow=False, xanchor="left", yanchor="bottom",
                                font=dict(color="green", size=11))
-        fig.add_shape(type="line", x0="2021-06-01", x1="2021-06-01",
+
+        # Train/test split line
+        fig.add_shape(type="line",
+                      x0=str(TRAIN_CUTOFF)[:10], x1=str(TRAIN_CUTOFF)[:10],
                       y0=0, y1=1, yref="paper",
                       line=dict(dash="dot", color="gray", width=1.5))
-        fig.add_annotation(x="2021-06-01", y=0.96, yref="paper",
-                           text="Forecast begins", showarrow=False,
+        fig.add_annotation(x=str(TRAIN_CUTOFF)[:10], y=0.96, yref="paper",
+                           text=lbl_split, showarrow=False,
                            xanchor="left", font=dict(color="gray", size=11))
+
+        # End of data line
+        fig.add_shape(type="line",
+                      x0="2021-06-01", x1="2021-06-01",
+                      y0=0, y1=1, yref="paper",
+                      line=dict(dash="dot", color="#2E7D32", width=1.5))
+        fig.add_annotation(x="2021-06-01", y=0.88, yref="paper",
+                           text=lbl_data, showarrow=False,
+                           xanchor="left", font=dict(color="#2E7D32", size=11))
+
         fig.update_layout(
             title=title, xaxis_title="Date", yaxis_title=y_label,
             height=480, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            legend=dict(x=0.01, y=0.99),
         )
         st.plotly_chart(fig, use_container_width=True)
 
