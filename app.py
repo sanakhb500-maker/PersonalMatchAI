@@ -1229,7 +1229,7 @@ def page_forecasting(data):
                 name=f"{gov} — historical", line=dict(color=color, width=2),
             ))
             fig3.add_trace(go.Scatter(
-                x=fut["ds"], y=fut["yhat"], mode="lines",
+                x=test["ds"], y=test["yhat"], mode="lines",
                 name=f"{gov} — forecast", line=dict(color=color, width=2, dash="dash"),
             ))
         fig3.add_shape(type="line", x0=0, x1=1, xref="paper",
