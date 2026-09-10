@@ -1101,102 +1101,108 @@ def page_forecasting(data):
     tab1, tab2, tab3 = st.tabs(TP("forecast_tabs",lang))
 
     def forecast_chart(fc, title, y_label, color, threshold=None):
+        """Show historical model fit + test set prediction vs actual."""
         if fc.empty:
             st.info("Forecast data not found.")
             return
 
-        # Split: training = up to Jun 2020, test = Jul 2020 to Jun 2021
-        train = fc[fc["ds"] <= TRAIN_CUTOFF].copy()
-        test  = fc[(fc["ds"] > TRAIN_CUTOFF) & (fc["ds"] <= CUTOFF)].copy()
+        # Chronological split
+        df_train = fc[fc["ds"] <= TRAIN_CUTOFF].copy()
+        df_test  = fc[(fc["ds"] > TRAIN_CUTOFF) & (fc["ds"] <= CUTOFF)].copy()
 
-        if lang == "ar":
-            lbl_train = "بيانات التدريب (ملاءمة النموذج)"
-            lbl_ci    = "فترة ثقة 80% (مجموعة الاختبار)"
-            lbl_pred  = "متوقّع — مجموعة الاختبار"
-            lbl_split = "بداية مجموعة الاختبار"
-            lbl_end   = "نهاية البيانات"
-        else:
-            lbl_train = "Training data (model fit)"
-            lbl_ci    = "80% confidence interval (test set)"
-            lbl_pred  = "Predicted — test set"
-            lbl_split = "Test set begins"
-            lbl_end   = "End of data"
+        labels = {
+            "train": "بيانات التدريب" if lang == "ar" else "Training data (model fit)",
+            "ci"   : "فترة ثقة 80%" if lang == "ar" else "80% confidence interval",
+            "pred" : "متوقّع — الاختبار" if lang == "ar" else "Predicted (test set)",
+            "split": "بداية الاختبار" if lang == "ar" else "Test set begins",
+            "end"  : "نهاية البيانات" if lang == "ar" else "End of data",
+        }
 
-        figfc = go.Figure()
+        figx = go.Figure()
 
-        # Confidence band — test period only
-        if not test.empty:
-            try:
-                r, g, b = px.colors.hex_to_rgb(color)
-                band_color = f"rgba({r},{g},{b},40)"
-            except Exception:
-                band_color = "rgba(200,100,50,40)"
-            figfc.add_trace(go.Scatter(
-                x=pd.concat([test["ds"], test["ds"][::-1]]),
-                y=pd.concat([test["yhat_upper"], test["yhat_lower"][::-1]]),
-                fill="toself", fillcolor=band_color,
-                line=dict(color="rgba(0,0,0,0)"), name=lbl_ci,
+        # Confidence band over test period
+        if not df_test.empty:
+            figx.add_trace(go.Scatter(
+                x=list(df_test["ds"]) + list(df_test["ds"])[::-1],
+                y=list(df_test["yhat_upper"]) + list(df_test["yhat_lower"])[::-1],
+                fill="toself", fillcolor="rgba(200,130,50,0.15)",
+                line=dict(color="rgba(0,0,0,0)"),
+                name=labels["ci"], showlegend=True,
             ))
 
         # Training line
-        if not train.empty:
-            figfc.add_trace(go.Scatter(
-                x=train["ds"], y=train["yhat"], mode="lines",
-                name=lbl_train, line=dict(color="#1F4E79", width=2),
+        if not df_train.empty:
+            figx.add_trace(go.Scatter(
+                x=df_train["ds"], y=df_train["yhat"],
+                mode="lines", name=labels["train"],
+                line=dict(color="#1F4E79", width=2),
             ))
 
-        # Predicted line — test period
-        if not test.empty:
-            figfc.add_trace(go.Scatter(
-                x=test["ds"], y=test["yhat"],
-                mode="lines+markers",
-                name=lbl_pred,
+        # Predicted line over test period
+        if not df_test.empty:
+            figx.add_trace(go.Scatter(
+                x=df_test["ds"], y=df_test["yhat"],
+                mode="lines+markers", name=labels["pred"],
                 line=dict(color=color, width=2.5, dash="dash"),
                 marker=dict(size=6),
             ))
 
         # Affordability threshold
         if threshold is not None:
-            figfc.add_shape(type="line", x0=0, x1=1, xref="paper",
-                            y0=threshold, y1=threshold,
-                            line=dict(dash="dash", color="green", width=1.5))
-            figfc.add_annotation(x=0.01, xref="paper", y=threshold,
-                                 text=f"Threshold ({threshold})",
-                                 showarrow=False, xanchor="left",
-                                 yanchor="bottom",
-                                 font=dict(color="green", size=11))
+            figx.add_shape(
+                type="line", x0=0, x1=1, xref="paper",
+                y0=threshold, y1=threshold,
+                line=dict(dash="dash", color="green", width=1.5)
+            )
+            figx.add_annotation(
+                x=0.01, xref="paper", y=threshold,
+                text=f"Threshold ({threshold})",
+                showarrow=False, xanchor="left", yanchor="bottom",
+                font=dict(color="green", size=11)
+            )
 
-        # Train/test split marker
-        figfc.add_shape(type="line",
-                        x0=str(TRAIN_CUTOFF)[:10], x1=str(TRAIN_CUTOFF)[:10],
-                        y0=0, y1=1, yref="paper",
-                        line=dict(dash="dot", color="gray", width=1.5))
-        figfc.add_annotation(x=str(TRAIN_CUTOFF)[:10], y=0.96, yref="paper",
-                             text=lbl_split, showarrow=False,
-                             xanchor="left", font=dict(color="gray", size=11))
+        # Train/test split line
+        figx.add_shape(
+            type="line",
+            x0=str(TRAIN_CUTOFF)[:10], x1=str(TRAIN_CUTOFF)[:10],
+            y0=0, y1=1, yref="paper",
+            line=dict(dash="dot", color="gray", width=1.5)
+        )
+        figx.add_annotation(
+            x=str(TRAIN_CUTOFF)[:10], y=0.96, yref="paper",
+            text=labels["split"], showarrow=False,
+            xanchor="left", font=dict(color="gray", size=11)
+        )
 
-        # End of data marker
-        figfc.add_shape(type="line",
-                        x0="2021-06-01", x1="2021-06-01",
-                        y0=0, y1=1, yref="paper",
-                        line=dict(dash="dot", color="#2E7D32", width=1.5))
-        figfc.add_annotation(x="2021-06-01", y=0.88, yref="paper",
-                             text=lbl_end, showarrow=False,
-                             xanchor="left", font=dict(color="#2E7D32", size=11))
+        # End of data line
+        figx.add_shape(
+            type="line", x0="2021-06-01", x1="2021-06-01",
+            y0=0, y1=1, yref="paper",
+            line=dict(dash="dot", color="#2E7D32", width=1.5)
+        )
+        figx.add_annotation(
+            x="2021-06-01", y=0.85, yref="paper",
+            text=labels["end"], showarrow=False,
+            xanchor="left", font=dict(color="#2E7D32", size=11)
+        )
 
-        figfc.update_layout(
-            title=title, xaxis_title="Date", yaxis_title=y_label,
+        figx.update_layout(
+            title=title,
+            xaxis_title="Date",
+            yaxis_title=y_label,
             height=480,
-            plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             legend=dict(x=0.01, y=0.99),
         )
-        st.plotly_chart(figfc, use_container_width=True)
+        st.plotly_chart(figx, use_container_width=True)
 
-        # Forecast table — test period only
-        if not test.empty:
-            tbl = test[["ds","yhat","yhat_lower","yhat_upper"]].copy()
+        # Table of test period predictions
+        if not df_test.empty:
+            tbl = df_test[["ds","yhat","yhat_lower","yhat_upper"]].copy()
             tbl.columns = ["Month","Forecast","Lower Bound","Upper Bound"]
             tbl["Month"] = tbl["Month"].dt.strftime("%B %Y")
             for c in ["Forecast","Lower Bound","Upper Bound"]:
-                tbl[c] = tbl[c].apply(lambda x: f"{x:,.2f}")
+                tbl[c] = tbl[c].apply(lambda v: f"{v:,.2f}")
             st.dataframe(tbl, use_container_width=True, hide_index=True)
+
