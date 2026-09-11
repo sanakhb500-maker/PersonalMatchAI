@@ -1186,8 +1186,8 @@ def page_forecasting(data):
         st.plotly_chart(fig, use_container_width=True)
 
         # Forecast table
-        if not fut.empty:
-            t = fut[["ds","yhat","yhat_lower","yhat_upper"]].copy()
+        if not df_test.empty:
+            t = df_test[["ds","yhat","yhat_lower","yhat_upper"]].copy()
             t.columns = ["Month","Forecast","Lower Bound","Upper Bound"]
             t["Month"] = t["Month"].dt.strftime("%B %Y")
             for c in ["Forecast","Lower Bound","Upper Bound"]:
