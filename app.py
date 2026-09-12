@@ -144,15 +144,7 @@ def login_page():
                 else:
                     st.error("Invalid username or password")
 
-        '''st.markdown("""
-        <div style="text-align:center; margin-top:16px; padding:12px;
-             background:#F8F9FA; border-radius:8px; font-size:0.78rem; color:#888;">
-            Demo credentials:<br>
-            <b>admin</b> / admin123 &nbsp;·&nbsp;
-            <b>company1</b> / company123 &nbsp;·&nbsp;
-            <b>analyst</b> / analyst123
-        </div>
-        """, unsafe_allow_html=True)'''
+
 
 # ─── Data loading ─────────────────────────────────────────────────
 @st.cache_data
