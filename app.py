@@ -144,7 +144,16 @@ def login_page():
                 else:
                     st.error("Invalid username or password")
 
-
+        st.markdown("""
+        <div style="text-align:center; margin-top:16px; padding:12px;
+             background:#F8F9FA; border-radius:8px; font-size:0.78rem; color:#888;">
+            <b>Admin login:</b> admin / admin123<br>
+            <b>Analyst login:</b> analyst / analyst123<br>
+            <span style="font-size:0.72rem; color:#aaa;">
+            Companies use their private link — no password required.
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ─── Data loading ─────────────────────────────────────────────────
 @st.cache_data
@@ -465,10 +474,20 @@ def page_home(data):
     lang = st.session_state.get("lang", "en")
     role = st.session_state.get("user_role", "")
     if role == "Company":
+        # Show different banner for direct-link access vs password login
+        is_direct = st.session_state.get("username") == "company_direct"
+        if is_direct:
+            direct_note = (
+                "🔗 وصلت عبر رابط الشريك المباشر"
+                if lang == "ar" else
+                "🔗 You accessed via your private company link"
+            )
+        else:
+            direct_note = T("company_msg", lang)
         st.markdown(f"""
         <div style="background:#1F4E79; color:#BDD7EE; padding:8px 16px;
              border-radius:8px; font-size:0.82rem; margin-bottom:12px;">
-            {T("company_msg", lang)}
+            {direct_note}
         </div>
         """, unsafe_allow_html=True)
 
@@ -2056,11 +2075,36 @@ def page_upload(data):
                     st.warning("No governorates in your file matched the benchmark data. Check governorate name spelling.")
 
 
+# ── Access tokens ────────────────────────────────────────────────
+COMPANY_TOKEN = "company-syria-2025"   # share this URL with companies
+# URL: https://personalmatchai-syria.streamlit.app/?access=company-syria-2025
+
 def main():
     if "logged_in" not in st.session_state:
         st.session_state["logged_in"] = False
     if "lang" not in st.session_state:
         st.session_state["lang"] = "en"
+
+    # ── URL-based direct authentication ───────────────────────────
+    try:
+        params       = st.query_params
+        access_token = params.get("access", "")
+    except Exception:
+        access_token = ""
+
+    # Company direct-access link — no login page shown
+    if access_token == COMPANY_TOKEN and not st.session_state["logged_in"]:
+        st.session_state["logged_in"]  = True
+        st.session_state["username"]   = "company_direct"
+        st.session_state["user_name"]  = "Company Partner"
+        st.session_state["user_role"]  = "Company"
+        if "page" not in st.session_state:
+            st.session_state["page"]   = "Home"
+        # Clear the token from the URL bar (cleaner UX)
+        try:
+            st.query_params.clear()
+        except Exception:
+            pass
 
     if not st.session_state["logged_in"]:
         login_page()
